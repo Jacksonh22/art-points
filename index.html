@@ -407,7 +407,54 @@
       </div>
     </div>
   </div>
+<!-- 8. RANDOM PICKER & ROSTER MODAL -->
+  <div id="namePickerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-xl text-white flex items-center gap-2">
+          <span>🎯</span> Random Picker & Roster
+        </h3>
+        <button onclick="closeNamePickerModal()" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
+      </div>
 
+      <!-- Pick Display -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-center space-y-1">
+        <div class="text-xs text-amber-400 font-bold uppercase tracking-wider">Selected Student / Table</div>
+        <div id="chosenNameDisplay" class="text-3xl font-black text-yellow-300 min-h-[40px] flex items-center justify-center">
+          Ready!
+        </div>
+      </div>
+
+      <!-- Add New Name Input -->
+      <div class="flex gap-2">
+        <input type="text" id="newRosterInput" placeholder="Add student or table..." class="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+        <button onclick="addRosterItem()" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition">
+          + Add
+        </button>
+      </div>
+
+      <!-- Roster Interactive List -->
+      <div class="space-y-1">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between">
+          <span>Roster (<span id="rosterCount">0</span>)</span>
+          <span class="text-[10px] text-slate-500">Absent students are skipped</span>
+        </div>
+        <div id="rosterListContainer" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 border border-slate-800 bg-slate-950 p-2 rounded-xl">
+          <!-- Dynamically populated roster rows -->
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button onclick="pickRandomName()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow transition text-sm">
+          🎲 Pick Random
+        </button>
+        <button onclick="closeNamePickerModal()" class="px-4 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl hover:bg-slate-700 transition border border-slate-700">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
   <!-- JAVASCRIPT APP LOGIC -->
   <script>
     /* ==========================================================================
