@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Art Points Studio Ed</title>
@@ -47,7 +47,6 @@
       min-height: 100vh;
     }
     
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -63,7 +62,6 @@
       background: #475569;
     }
 
-    /* Confetti canvas */
     #confettiCanvas {
       position: fixed;
       top: 0;
@@ -79,7 +77,6 @@
 
   <canvas id="confettiCanvas"></canvas>
 
-  <!-- TOP APP HEADER -->
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       
@@ -96,12 +93,12 @@
         </div>
       </div>
 
-      <!-- Class Switcher & Primary Controls -->
+      <!-- Class Switcher & Main Buttons -->
       <div class="flex items-center gap-2 flex-wrap">
         
         <!-- Class Selector Dropdown -->
         <div class="relative">
-          <select id="classSelect" onchange="switchClass(this.value)" class="bg-slate-950 text-amber-300 font-bold text-sm px-3 py-2 pr-8 rounded-xl border border-slate-800 focus:outline-none focus:border-amber-400 cursor-pointer shadow-inner">
+          <select id="classSelect" onchange="switchClass(this.value)" class="bg-slate-950 text-amber-300 font-bold text-sm px-3 py-2 pr-8 rounded-xl border border-slate-800 focus:outline-none focus:border-amber-400 cursor-pointer shadow-inner max-w-[220px] truncate">
             <!-- Dynamically Populated -->
           </select>
         </div>
@@ -112,26 +109,30 @@
           <span>Classes</span>
         </button>
 
-        <!-- Artist of the Day Wheel Picker Button -->
+        <!-- Bulk Name Import Button -->
+        <button onclick="openBulkImportModal()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs font-bold px-3 py-2 rounded-xl border border-indigo-500/30 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-file-import text-indigo-400"></i>
+          <span>Bulk Import Roster</span>
+        </button>
+
+        <!-- Artist Picker Button -->
         <button onclick="openArtistModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-md transition flex items-center gap-1.5">
           <i class="fa-solid fa-dice text-yellow-300"></i>
           <span>Artist Picker</span>
         </button>
 
-        <!-- Add Table Button -->
-        <button onclick="openAddTableModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
-          <i class="fa-solid fa-plus"></i>
-          <span>Table</span>
+        <!-- Backup / Settings Button -->
+        <button onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-2 rounded-xl border border-slate-700 transition" title="Backup & Restore Data">
+          <i class="fa-solid fa-gear"></i>
         </button>
       </div>
 
     </div>
   </header>
 
-  <!-- MAIN APP CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- CLASS DAILY SCORE TRACKER (5 RUBRIC STEPS) -->
+    <!-- DAILY CLASS RUBRIC TRACKER -->
     <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div>
@@ -151,23 +152,29 @@
         </div>
       </div>
 
-      <!-- 5 Interactive Routine Buttons -->
+      <!-- 5 Interactive Routine Steps -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4" id="rubricButtonsContainer">
-        <!-- Generated dynamically via Javascript -->
+        <!-- Rendered via Javascript -->
       </div>
     </section>
 
     <!-- TABLES & SEATING GRID DISPLAY -->
     <section class="space-y-4">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
             <i class="fa-solid fa-border-all text-indigo-400"></i> Studio Tables & Seating
           </h2>
-          <p class="text-xs text-slate-400">Click points to award individual or table points. Toggle attendance directly on student cards.</p>
+          <p class="text-xs text-slate-400">Adjust individual points, toggle attendance, or reward whole tables.</p>
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Add Table Button -->
+          <button onclick="openAddTableModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Table</span>
+          </button>
+          
           <!-- Reset Daily Points Button -->
           <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
             <i class="fa-solid fa-rotate-left text-slate-400"></i>
@@ -184,25 +191,58 @@
 
   </main>
 
-  <!-- FOOTER -->
   <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
-    <p>Art Points Studio Ed &bull; Preserving Student Rosters & Table Point History &bull; Auto-saved locally</p>
+    <p>Art Points Studio Ed &bull; Auto-migrates legacy localStorage rosters &bull; Safe & Local</p>
   </footer>
 
-  <!-- MODAL 1: ARTIST OF THE DAY PICKER MODAL -->
+  <!-- MODAL 1: BULK NAME UPLOAD MODAL -->
+  <div id="bulkImportModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-lg text-white flex items-center gap-2">
+          <i class="fa-solid fa-file-import text-indigo-400"></i> Bulk Roster Import
+        </h3>
+        <button onclick="closeBulkImportModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-400">Paste your class roster below (one name per line, or comma-separated). You can assign them to a specific table or spread them across tables automatically.</p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Target Table</label>
+          <select id="bulkImportTableSelect" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <!-- Dynamically Populated -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Paste Student Names</label>
+          <textarea id="bulkImportTextarea" rows="8" placeholder="John Doe&#10;Jane Smith&#10;Alex Johnson..." class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 font-mono focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button onclick="executeBulkImport()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition">
+          Import Student Roster
+        </button>
+        <button onclick="closeBulkImportModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ARTIST OF THE DAY PICKER MODAL -->
   <div id="artistModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl text-center space-y-5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="font-bold text-lg text-white flex items-center gap-2">
-          <i class="fa-solid fa-crown text-amber-400"></i> Artist of the Day / Week
+          <i class="fa-solid fa-crown text-amber-400"></i> Artist of the Day
         </h3>
         <button onclick="closeArtistModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
       </div>
 
-      <!-- Spotlight Display -->
       <div class="bg-slate-950 border-2 border-indigo-500/30 rounded-2xl p-6 min-h-[140px] flex flex-col items-center justify-center relative overflow-hidden">
-        <div id="artistSpinnerEffect" class="absolute inset-0 bg-indigo-500/10 opacity-0 transition-opacity"></div>
-        <div class="text-xs font-extrabold uppercase tracking-widest text-amber-400 mb-1">Selected Student</div>
         <div id="artistWinnerDisplay" class="text-3xl font-black text-white tracking-tight">
           Ready to Spin!
         </div>
@@ -220,7 +260,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: CLASS MANAGER MODAL -->
+  <!-- MODAL 3: CLASS MANAGER MODAL -->
   <div id="classModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -230,7 +270,6 @@
         <button onclick="closeClassModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
       </div>
 
-      <!-- Add New Class Form -->
       <div class="flex gap-2">
         <input type="text" id="newClassNameInput" placeholder="New Class Name (e.g. 3rd Period Art)" class="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-400">
         <button onclick="createNewClass()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
@@ -238,7 +277,6 @@
         </button>
       </div>
 
-      <!-- Existing Class List -->
       <div class="space-y-2 max-h-64 overflow-y-auto pr-1" id="classListContainer">
         <!-- Dynamically rendered -->
       </div>
@@ -251,7 +289,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: ADD / EDIT STUDENT MODAL -->
+  <!-- MODAL 4: ADD / EDIT STUDENT MODAL -->
   <div id="studentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -293,7 +331,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: ADD / EDIT TABLE MODAL -->
+  <!-- MODAL 5: ADD / EDIT TABLE MODAL -->
   <div id="tableModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -335,49 +373,60 @@
     </div>
   </div>
 
+  <!-- MODAL 6: SETTINGS & BACKUP MODAL -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-lg text-white flex items-center gap-2">
+          <i class="fa-solid fa-gear text-slate-400"></i> Settings & Data Backup
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+          <div class="font-bold text-xs text-white">Export Roster Backup</div>
+          <p class="text-[11px] text-slate-400">Save a backup file of all your classes and student names to your computer.</p>
+          <button onclick="exportDataJSON()" class="mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
+            <i class="fa-solid fa-download mr-1"></i> Export Backup (.JSON)
+          </button>
+        </div>
+
+        <div class="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+          <div class="font-bold text-xs text-white">Import Roster Backup</div>
+          <p class="text-[11px] text-slate-400">Restore class rosters from a previously saved JSON file.</p>
+          <input type="file" id="importJsonFileInput" accept=".json" onchange="importDataJSON(event)" class="hidden">
+          <button onclick="document.getElementById('importJsonFileInput').click()" class="mt-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition">
+            <i class="fa-solid fa-upload mr-1"></i> Choose Backup File
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-800">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ==========================================================================
-       STORAGE KEYS & MIGRATION ARCHITECTURE
+       STORAGE KEYS & DEEP DATA MIGRATION ENGINE
        ========================================================================== */
     const PRIMARY_STORAGE_KEY = 'ART_POINTS_STUDIO_ED_DATA';
-    const LEGACY_STORAGE_KEYS = ['seatingChartData', 'artRoomData', 'appData'];
+    const LEGACY_KEYS = ['seatingChartData', 'artRoomData', 'appData'];
 
-    // Default starting state if no local storage data is found
     const DEFAULT_APP_STATE = {
       activeClassId: 'class_default',
       classes: {
         'class_default': {
           id: 'class_default',
           name: '1st Period Art',
-          rubricScore: {
-            warmup: false,
-            instruction: false,
-            studio: false,
-            cleanup: false,
-            lineup: false,
-            date: new Date().toISOString().split('T')[0]
-          },
+          rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
           tables: [
-            {
-              id: 'table_red',
-              name: 'Red Table',
-              color: 'red',
-              dailyPoints: 0,
-              students: [
-                { id: 's1', name: 'Alex M.', seat: 1, points: 5, present: true },
-                { id: 's2', name: 'Jordan P.', seat: 2, points: 3, present: true }
-              ]
-            },
-            {
-              id: 'table_blue',
-              name: 'Blue Table',
-              color: 'blue',
-              dailyPoints: 0,
-              students: [
-                { id: 's3', name: 'Taylor K.', seat: 1, points: 4, present: true },
-                { id: 's4', name: 'Morgan S.', seat: 2, points: 6, present: true }
-              ]
-            }
+            { id: 't_red', name: 'Red Table', color: 'red', dailyPoints: 0, students: [] },
+            { id: 't_blue', name: 'Blue Table', color: 'blue', dailyPoints: 0, students: [] }
           ]
         }
       }
@@ -386,7 +435,7 @@
     let appData = null;
 
     /* ==========================================================================
-       AUDIO SYNTHESIZER (Web Audio API)
+       WEB AUDIO SYNTHESIZER
        ========================================================================== */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -403,8 +452,8 @@
 
       if (type === 'ding') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, now); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
@@ -433,36 +482,73 @@
     }
 
     /* ==========================================================================
-       DATA PERSISTENCE & MIGRATION ENGINE
+       DATA LOADING & COMBINED MIGRATION
        ========================================================================== */
     function loadAndMigrateData() {
-      // 1. Try primary storage key
-      let rawData = localStorage.getItem(PRIMARY_STORAGE_KEY);
+      let combinedClasses = {};
+      let foundAnyData = false;
 
-      // 2. Fallback to legacy keys if primary does not exist
-      if (!rawData) {
-        for (const legacyKey of LEGACY_STORAGE_KEYS) {
-          const legacyData = localStorage.getItem(legacyKey);
-          if (legacyData) {
-            rawData = legacyData;
-            console.log(`Migrating existing data from legacy key: ${legacyKey}`);
-            break;
+      // 1. Scan primary key
+      const primaryData = localStorage.getItem(PRIMARY_STORAGE_KEY);
+      if (primaryData) {
+        try {
+          const parsed = JSON.parse(primaryData);
+          if (parsed && parsed.classes) {
+            Object.assign(combinedClasses, parsed.classes);
+            foundAnyData = true;
           }
-        }
+        } catch (e) { console.error("Error reading primary data", e); }
       }
 
-      if (rawData) {
-        try {
-          appData = JSON.parse(rawData);
-          validateAndSanitizeState();
-        } catch (err) {
-          console.error("Error parsing saved state, falling back to default:", err);
-          appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+      // 2. Scan all legacy keys and merge rosters
+      LEGACY_KEYS.forEach(key => {
+        const legacyRaw = localStorage.getItem(key);
+        if (legacyRaw) {
+          try {
+            const parsed = JSON.parse(legacyRaw);
+            if (parsed) {
+              if (parsed.classes) {
+                Object.entries(parsed.classes).forEach(([clsId, clsObj]) => {
+                  if (!combinedClasses[clsId]) {
+                    combinedClasses[clsId] = clsObj;
+                  } else {
+                    // Deep merge tables and students
+                    if (clsObj.tables && Array.isArray(clsObj.tables)) {
+                      clsObj.tables.forEach(legacyTable => {
+                        let existingTable = combinedClasses[clsId].tables.find(t => t.id === legacyTable.id || t.name === legacyTable.name);
+                        if (!existingTable) {
+                          combinedClasses[clsId].tables.push(legacyTable);
+                        } else {
+                          // Merge students inside existing table
+                          if (legacyTable.students && Array.isArray(legacyTable.students)) {
+                            legacyTable.students.forEach(s => {
+                              if (!existingTable.students.some(es => es.id === s.id || es.name === s.name)) {
+                                existingTable.students.push(s);
+                              }
+                            });
+                          }
+                        }
+                      });
+                    }
+                  }
+                });
+                foundAnyData = true;
+              }
+            }
+          } catch (e) { console.error(`Error parsing legacy key ${key}`, e); }
         }
+      });
+
+      if (foundAnyData && Object.keys(combinedClasses).length > 0) {
+        appData = {
+          activeClassId: Object.keys(combinedClasses)[0],
+          classes: combinedClasses
+        };
       } else {
         appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
       }
 
+      validateAndSanitizeState();
       saveData();
     }
 
@@ -482,21 +568,16 @@
 
       const today = new Date().toISOString().split('T')[0];
 
-      // Ensure all classes have tables, students, seats, present flag, and rubric data
       Object.values(appData.classes).forEach(cls => {
         if (!cls.tables || !Array.isArray(cls.tables)) {
-          cls.tables = [];
+          cls.tables = [
+            { id: 't_default1', name: 'Table 1', color: 'red', dailyPoints: 0, students: [] },
+            { id: 't_default2', name: 'Table 2', color: 'blue', dailyPoints: 0, students: [] }
+          ];
         }
 
         if (!cls.rubricScore || cls.rubricScore.date !== today) {
-          cls.rubricScore = {
-            warmup: false,
-            instruction: false,
-            studio: false,
-            cleanup: false,
-            lineup: false,
-            date: today
-          };
+          cls.rubricScore = { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today };
         }
 
         cls.tables.forEach(table => {
@@ -516,7 +597,7 @@
       try {
         localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(appData));
       } catch (e) {
-        console.error("Failed to save state to localStorage:", e);
+        console.error("Failed to save state:", e);
       }
     }
 
@@ -525,8 +606,7 @@
     }
 
     /* ==========================================================================
-       STREAMING_CHUNK:Rendering main application UI components & handlers...
-       APPLICATION RENDERERS
+       RENDERERS
        ========================================================================== */
     function renderApp() {
       renderClassSelect();
@@ -537,8 +617,7 @@
 
     function renderDateBadge() {
       const today = new Date();
-      const options = { weekday: 'short', month: 'short', day: 'numeric' };
-      document.getElementById('currentDateBadge').textContent = today.toLocaleDateString('en-US', options);
+      document.getElementById('currentDateBadge').textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     }
 
     function renderClassSelect() {
@@ -549,9 +628,7 @@
         const option = document.createElement('option');
         option.value = cls.id;
         option.textContent = cls.name;
-        if (cls.id === appData.activeClassId) {
-          option.selected = true;
-        }
+        if (cls.id === appData.activeClassId) option.selected = true;
         select.appendChild(option);
       });
     }
@@ -565,7 +642,7 @@
     }
 
     /* ==========================================================================
-       RUBRIC ROUTINE SCORE TRACKER (5 POINTS PER DAY)
+       ROUTINE RUBRIC ENGINE
        ========================================================================== */
     const RUBRIC_STEPS = [
       { key: 'warmup', label: '1. Enter / Warm Up', icon: 'fa-door-open' },
@@ -590,17 +667,13 @@
         const btn = document.createElement('button');
         btn.onclick = () => toggleRubricStep(step.key);
         btn.className = `p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-md ${
-          isChecked 
-            ? 'bg-amber-400/10 border-amber-400/50 text-amber-300' 
-            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+          isChecked ? 'bg-amber-400/10 border-amber-400/50 text-amber-300' : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
         }`;
 
         btn.innerHTML = `
           <div class="flex items-center justify-between">
             <i class="fa-solid ${step.icon} ${isChecked ? 'text-amber-400' : 'text-slate-500'}"></i>
-            <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold ${
-              isChecked ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-500'
-            }">
+            <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold ${isChecked ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-500'}">
               ${isChecked ? '✓' : '+1'}
             </span>
           </div>
@@ -610,10 +683,8 @@
         container.appendChild(btn);
       });
 
-      // Update badge & progress bar
       document.getElementById('classScoreBadge').textContent = `${earned} / 5 Points`;
-      const pct = (earned / 5) * 100;
-      document.getElementById('classProgressBar').style.width = `${pct}%`;
+      document.getElementById('classProgressBar').style.width = `${(earned / 5) * 100}%`;
     }
 
     function toggleRubricStep(key) {
@@ -621,11 +692,8 @@
       const currentVal = currentClass.rubricScore[key];
       currentClass.rubricScore[key] = !currentVal;
 
-      if (!currentVal) {
-        playSound('ding');
-      } else {
-        playSound('dong');
-      }
+      if (!currentVal) playSound('ding');
+      else playSound('dong');
 
       saveData();
       renderClassRubric();
@@ -635,12 +703,12 @@
        TABLES & STUDENT SEATING GRID
        ========================================================================== */
     const COLOR_CLASSES = {
-      red: { border: 'border-red-500/40', bg: 'bg-red-500/10', text: 'text-red-400', badge: 'bg-red-500/20 text-red-300' },
-      orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10', text: 'text-orange-400', badge: 'bg-orange-500/20 text-orange-300' },
-      yellow: { border: 'border-amber-500/40', bg: 'bg-amber-500/10', text: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
-      green: { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
-      blue: { border: 'border-blue-500/40', bg: 'bg-blue-500/10', text: 'text-blue-400', badge: 'bg-blue-500/20 text-blue-300' },
-      purple: { border: 'border-purple-500/40', bg: 'bg-purple-500/10', text: 'text-purple-400', badge: 'bg-purple-500/20 text-purple-300' }
+      red: { border: 'border-red-500/40', bg: 'bg-red-500/10' },
+      orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10' },
+      yellow: { border: 'border-amber-500/40', bg: 'bg-amber-500/10' },
+      green: { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10' },
+      blue: { border: 'border-blue-500/40', bg: 'bg-blue-500/10' },
+      purple: { border: 'border-purple-500/40', bg: 'bg-purple-500/10' }
     };
 
     function renderTablesGrid() {
@@ -663,74 +731,40 @@
 
       currentClass.tables.forEach(table => {
         const colorStyle = COLOR_CLASSES[table.color] || COLOR_CLASSES.blue;
+        const sortedStudents = [...table.students].sort((a, b) => (a.seat || 0) - (b.seat || 0));
 
         const tableCard = document.createElement('div');
         tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4`;
 
-        // Sort students by seat number
-        const sortedStudents = [...table.students].sort((a, b) => (a.seat || 0) - (b.seat || 0));
-
         let studentsHtml = '';
         if (sortedStudents.length === 0) {
-          studentsHtml = `
-            <div class="text-center py-6 text-xs text-slate-500 italic">
-              No students assigned to this table.
-            </div>
-          `;
+          studentsHtml = `<div class="text-center py-6 text-xs text-slate-500 italic">No students assigned to this table.</div>`;
         } else {
           studentsHtml = sortedStudents.map(student => {
             const isAbsent = student.present === false;
 
             return `
-              <div class="flex items-center justify-between p-2.5 rounded-2xl transition border ${
-                isAbsent 
-                  ? 'bg-slate-950/40 border-slate-800/50 opacity-50' 
-                  : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-              }">
-                <!-- Seat & Name -->
+              <div class="flex items-center justify-between p-2 rounded-2xl transition border ${isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}">
                 <div class="flex items-center gap-2 overflow-hidden">
-                  <!-- Seat Badge -->
-                  <span class="text-[10px] font-black px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
+                  <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
                     S${student.seat || 1}
                   </span>
 
-                  <!-- Attendance Toggle Button -->
-                  <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition shrink-0 ${
-                    isAbsent 
-                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' 
-                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  }">
+                  <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
                     ${isAbsent ? 'ABSENT' : 'PRESENT'}
                   </button>
 
-                  <!-- Student Name -->
                   <span class="font-bold text-xs truncate ${isAbsent ? 'line-through text-slate-500' : 'text-slate-100'}">
                     ${escapeHtml(student.name)}
                   </span>
                 </div>
 
-                <!-- Points & Individual Actions -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <!-- Individual Point Adjusters -->
-                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">
-                    -
-                  </button>
-
-                  <span class="text-xs font-black px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 min-w-[28px] text-center">
-                    ${student.points || 0}
-                  </span>
-
-                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed">
-                    +
-                  </button>
-
-                  <!-- Edit / Delete Icons -->
-                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" title="Edit Student" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button onclick="deleteStudent('${table.id}', '${student.id}')" title="Delete Student" class="text-slate-500 hover:text-rose-400 p-1 text-xs">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
+                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${student.points || 0}</span>
+                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300 disabled:opacity-30">+</button>
+                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1"><i class="fa-solid fa-pen"></i></button>
+                  <button onclick="deleteStudent('${table.id}', '${student.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
                 </div>
               </div>
             `;
@@ -738,60 +772,41 @@
         }
 
         tableCard.innerHTML = `
-          <!-- Table Header -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full ${colorStyle.bg} border ${colorStyle.border}"></span>
                 <h3 class="font-black text-base text-white tracking-tight">${escapeHtml(table.name)}</h3>
               </div>
-
-              <!-- Table Action Menu -->
               <div class="flex items-center gap-1">
-                <button onclick="openEditTableModal('${table.id}')" title="Edit Table" class="text-slate-500 hover:text-amber-400 p-1 text-xs">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button onclick="deleteTable('${table.id}')" title="Delete Table" class="text-slate-500 hover:text-rose-400 p-1 text-xs">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="deleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>
 
-            <!-- Daily Table Points Banner -->
-            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 rounded-2xl p-2.5">
+            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 rounded-2xl p-2">
               <div class="flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
-                <span class="text-xs font-bold text-slate-300">Daily Team Points</span>
+                <span class="text-xs font-bold text-slate-300">Daily Table Points</span>
               </div>
-
               <div class="flex items-center gap-2">
-                <button onclick="addTablePoints('${table.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center hover:bg-slate-700">
-                  -
-                </button>
-                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
-                  ${table.dailyPoints || 0} pts
-                </span>
-                <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300">
-                  +
-                </button>
+                <button onclick="addTablePoints('${table.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center hover:bg-slate-700">-</button>
+                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">${table.dailyPoints || 0} pts</span>
+                <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300">+</button>
               </div>
             </div>
           </div>
 
-          <!-- Student Seats List -->
           <div class="space-y-2 flex-1">
             <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-              <span>Roster (${sortedStudents.length})</span>
-              <button onclick="distributeTablePointsToPresent('${table.id}')" title="Give +1 point to all present students at this table" class="text-indigo-400 hover:text-indigo-300 font-semibold normal-case flex items-center gap-1">
+              <span>Students (${sortedStudents.length})</span>
+              <button onclick="distributeTablePointsToPresent('${table.id}')" class="text-indigo-400 hover:text-indigo-300 font-semibold normal-case flex items-center gap-1">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Reward Team
               </button>
             </div>
-            <div class="space-y-1.5 max-h-72 overflow-y-auto pr-0.5">
-              ${studentsHtml}
-            </div>
+            <div class="space-y-1.5 max-h-72 overflow-y-auto pr-0.5">${studentsHtml}</div>
           </div>
 
-          <!-- Add Student Button -->
           <button onclick="openAddStudentModal('${table.id}')" class="w-full py-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-user-plus text-indigo-400"></i>
             <span>Add Student to Table</span>
@@ -800,6 +815,97 @@
 
         grid.appendChild(tableCard);
       });
+    }
+
+    /* ==========================================================================
+       BULK ROSTER IMPORT HANDLER
+       ========================================================================== */
+    function openBulkImportModal() {
+      const select = document.getElementById('bulkImportTableSelect');
+      select.innerHTML = '';
+
+      const currentClass = getActiveClass();
+
+      const autoOption = document.createElement('option');
+      autoOption.value = 'AUTO_DISTRIBUTE';
+      autoOption.textContent = '✨ Distribute evenly across all tables';
+      select.appendChild(autoOption);
+
+      currentClass.tables.forEach(table => {
+        const option = document.createElement('option');
+        option.value = table.id;
+        option.textContent = `Assign to: ${table.name}`;
+        select.appendChild(option);
+      });
+
+      document.getElementById('bulkImportTextarea').value = '';
+      document.getElementById('bulkImportModal').classList.remove('hidden');
+    }
+
+    function closeBulkImportModal() {
+      document.getElementById('bulkImportModal').classList.add('hidden');
+    }
+
+    function executeBulkImport() {
+      const text = document.getElementById('bulkImportTextarea').value;
+      const targetTableId = document.getElementById('bulkImportTableSelect').value;
+
+      if (!text || text.trim() === '') {
+        alert("Please paste student names first.");
+        return;
+      }
+
+      // Split by newlines or commas
+      const rawNames = text.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length > 0);
+
+      if (rawNames.length === 0) {
+        alert("No valid student names found.");
+        return;
+      }
+
+      const currentClass = getActiveClass();
+
+      if (currentClass.tables.length === 0) {
+        // Create default table if none exists
+        currentClass.tables.push({
+          id: 'table_' + Date.now(),
+          name: 'Main Table',
+          color: 'blue',
+          dailyPoints: 0,
+          students: []
+        });
+      }
+
+      if (targetTableId === 'AUTO_DISTRIBUTE') {
+        rawNames.forEach((name, idx) => {
+          const table = currentClass.tables[idx % currentClass.tables.length];
+          table.students.push({
+            id: 'student_' + Date.now() + '_' + idx,
+            name: name,
+            seat: (table.students.length % 5) + 1,
+            points: 0,
+            present: true
+          });
+        });
+      } else {
+        const table = currentClass.tables.find(t => t.id === targetTableId);
+        if (table) {
+          rawNames.forEach((name, idx) => {
+            table.students.push({
+              id: 'student_' + Date.now() + '_' + idx,
+              name: name,
+              seat: (table.students.length % 5) + 1,
+              points: 0,
+              present: true
+            });
+          });
+        }
+      }
+
+      saveData();
+      renderTablesGrid();
+      closeBulkImportModal();
+      playSound('fanfare');
     }
 
     /* ==========================================================================
@@ -876,8 +982,7 @@
     }
 
     /* ==========================================================================
-       STREAMING_CHUNK:Rendering student & table modal handlers...
-       STUDENT MODAL HANDLERS
+       STUDENT / TABLE / CLASS MODAL HANDLERS
        ========================================================================== */
     function openAddStudentModal(tableId) {
       document.getElementById('studentModalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-indigo-400"></i> Add Student';
@@ -924,22 +1029,19 @@
       if (!table) return;
 
       if (studentId) {
-        // Update existing student
         const student = table.students.find(s => s.id === studentId);
         if (student) {
           student.name = nameInput;
           student.seat = seatVal;
         }
       } else {
-        // Create new student
-        const newStudent = {
+        table.students.push({
           id: 'student_' + Date.now(),
           name: nameInput,
           seat: seatVal,
           points: 0,
           present: true
-        };
-        table.students.push(newStudent);
+        });
       }
 
       saveData();
@@ -960,9 +1062,6 @@
       }
     }
 
-    /* ==========================================================================
-       TABLE MODAL HANDLERS
-       ========================================================================== */
     function openAddTableModal() {
       document.getElementById('tableModalTitle').innerHTML = '<i class="fa-solid fa-plus text-emerald-400"></i> Add Studio Table';
       document.getElementById('tableModalTableId').value = '';
@@ -1006,14 +1105,13 @@
           table.color = colorVal;
         }
       } else {
-        const newTable = {
+        currentClass.tables.push({
           id: 'table_' + Date.now(),
           name: nameInput,
           color: colorVal,
           dailyPoints: 0,
           students: []
-        };
-        currentClass.tables.push(newTable);
+        });
       }
 
       saveData();
@@ -1024,16 +1122,13 @@
     function deleteTable(tableId) {
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
-      if (table && confirm(`Are you sure you want to delete ${table.name} and all assigned students?`)) {
+      if (table && confirm(`Are you sure you want to delete ${table.name}?`)) {
         currentClass.tables = currentClass.tables.filter(t => t.id !== tableId);
         saveData();
         renderTablesGrid();
       }
     }
 
-    /* ==========================================================================
-       CLASS MODAL HANDLERS
-       ========================================================================== */
     function openClassModal() {
       renderClassListInModal();
       document.getElementById('classModal').classList.remove('hidden');
@@ -1062,12 +1157,8 @@
           </div>
 
           <div class="flex items-center gap-1">
-            <button onclick="editClassName('${cls.id}')" title="Rename Class" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            <button onclick="deleteClass('${cls.id}')" title="Delete Class" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
 
@@ -1078,18 +1169,13 @@
     function createNewClass() {
       const nameInput = document.getElementById('newClassNameInput');
       const name = nameInput.value.trim();
-      if (!name) {
-        alert("Please enter a class name.");
-        return;
-      }
+      if (!name) return;
 
       const id = 'class_' + Date.now();
-      const today = new Date().toISOString().split('T')[0];
-
       appData.classes[id] = {
         id: id,
         name: name,
-        rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today },
+        rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
         tables: []
       };
 
@@ -1120,7 +1206,7 @@
       }
 
       const cls = appData.classes[classId];
-      if (cls && confirm(`Delete class "${cls.name}" and all its data?`)) {
+      if (cls && confirm(`Delete class "${cls.name}"?`)) {
         delete appData.classes[classId];
         if (appData.activeClassId === classId) {
           appData.activeClassId = Object.keys(appData.classes)[0];
@@ -1132,7 +1218,7 @@
     }
 
     /* ==========================================================================
-       ARTIST OF THE DAY RANDOM WHEEL PICKER
+       ARTIST OF THE DAY RANDOM PICKER
        ========================================================================== */
     function openArtistModal() {
       document.getElementById('artistWinnerDisplay').textContent = "Ready to Spin!";
@@ -1152,7 +1238,6 @@
       const currentClass = getActiveClass();
       const presentStudents = [];
 
-      // Collect all present students across all tables
       currentClass.tables.forEach(table => {
         table.students.forEach(student => {
           if (student.present !== false) {
@@ -1194,9 +1279,6 @@
       }, 100);
     }
 
-    /* ==========================================================================
-       CELEBRATION CONFETTI FX
-       ========================================================================== */
     function triggerConfetti() {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
@@ -1227,7 +1309,7 @@
             active = true;
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.3; // gravity
+            p.vy += 0.3;
             p.alpha -= 0.02;
 
             ctx.save();
@@ -1238,26 +1320,61 @@
           }
         });
 
-        if (active) {
-          requestAnimationFrame(animate);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        if (active) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
       animate();
     }
 
-    /* Utility function for safe HTML rendering */
+    /* ==========================================================================
+       SETTINGS & JSON BACKUP EXPORT / IMPORT
+       ========================================================================== */
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `ArtPoints_Roster_Backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataJSON(event) {
+      const fileReader = new FileReader();
+      fileReader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.classes) {
+            appData = imported;
+            validateAndSanitizeState();
+            saveData();
+            renderApp();
+            alert("Backup imported successfully!");
+            closeSettingsModal();
+          } else {
+            alert("Invalid backup file format.");
+          }
+        } catch (err) {
+          alert("Error parsing JSON backup file.");
+        }
+      };
+      if (event.target.files[0]) {
+        fileReader.readAsText(event.target.files[0]);
+      }
+    }
+
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"']/g, function(m) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[m];
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
       });
     }
 
