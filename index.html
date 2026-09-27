@@ -3,7 +3,7 @@
 <head>  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Art Points Studio Ed (Google Sheets Sync)</title>
+  <title>Art Points Studio Ed (Google Sheets Sync & Notes)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -138,8 +138,8 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- DAILY CLASS RUBRIC TRACKER -->
-    <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+    <!-- DAILY CLASS RUBRIC TRACKER & CLASS NOTES -->
+    <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div>
           <div class="flex items-center gap-2">
@@ -159,8 +159,19 @@
       </div>
 
       <!-- 5 Interactive Routine Steps -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4" id="rubricButtonsContainer">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="rubricButtonsContainer">
         <!-- Rendered via Javascript -->
+      </div>
+
+      <!-- CLASS-WIDE COMMENTS / NOTES SECTION -->
+      <div class="pt-2 border-t border-slate-800/80">
+        <div class="flex items-center justify-between mb-2">
+          <label for="classNotesInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-note-sticky text-amber-400"></i> Class Notes & Daily Reminders
+          </label>
+          <span class="text-[10px] text-slate-500">Auto-saves on edit</span>
+        </div>
+        <textarea id="classNotesInput" oninput="saveClassNotes()" rows="2" placeholder="Add class-wide announcements, project goals, or reminders for this section..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 transition resize-none"></textarea>
       </div>
     </section>
 
@@ -295,7 +306,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: ADD / EDIT STUDENT MODAL -->
+  <!-- MODAL 4: ADD / EDIT STUDENT MODAL (WITH COMMENTS SECTION) -->
   <div id="studentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -323,6 +334,11 @@
             <option value="4">Seat 4</option>
             <option value="5">Seat 5</option>
           </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Student Comments / Notes</label>
+          <textarea id="studentModalCommentInput" rows="3" placeholder="Add behavior notes, IEP accommodations, or project feedback..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
         </div>
       </div>
 
@@ -397,7 +413,7 @@
             <span class="font-bold text-xs text-white">Google Sheets Automated Backup Sync</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            Connect to your Google Sheet using a Google Apps Script Web App. This will automatically sync your rosters, seat numbers, points, and class rubric scores to Google Sheets.
+            Connect to your Google Sheet using a Google Apps Script Web App. This will automatically sync your rosters, seat numbers, points, class rubric scores, and comments to Google Sheets.
           </p>
 
           <div class="space-y-2">
@@ -460,6 +476,7 @@
         'class_default': {
           id: 'class_default',
           name: '1st Period Art',
+          notes: '',
           rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
           tables: [
             { id: 't_red', name: 'Red Table', color: 'red', dailyPoints: 0, students: [] },
@@ -613,6 +630,8 @@
       const today = new Date().toISOString().split('T')[0];
 
       Object.values(appData.classes).forEach(cls => {
+        if (cls.notes === undefined) cls.notes = '';
+
         if (!cls.tables || !Array.isArray(cls.tables)) {
           cls.tables = [
             { id: 't_default1', name: 'Table 1', color: 'red', dailyPoints: 0, students: [] },
@@ -632,6 +651,7 @@
             if (student.present === undefined) student.present = true;
             if (!student.seat) student.seat = (index % 5) + 1;
             if (student.points === undefined) student.points = 0;
+            if (student.comment === undefined) student.comment = '';
           });
         });
       });
@@ -650,6 +670,15 @@
 
     function getActiveClass() {
       return appData.classes[appData.activeClassId];
+    }
+
+    function saveClassNotes() {
+      const currentClass = getActiveClass();
+      const input = document.getElementById('classNotesInput');
+      if (currentClass && input) {
+        currentClass.notes = input.value;
+        saveData();
+      }
     }
 
     /* ==========================================================================
@@ -672,7 +701,7 @@
       try {
         const response = await fetch(url, {
           method: 'POST',
-          mode: 'no-cors', // standard for Google Apps Script Web App endpoints
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(appData)
         });
@@ -711,6 +740,7 @@
       renderClassSelect();
       renderDateBadge();
       renderClassRubric();
+      renderClassNotes();
       renderTablesGrid();
       populateSettingsInputs();
     }
@@ -747,6 +777,14 @@
         appData.activeClassId = classId;
         saveData();
         renderApp();
+      }
+    }
+
+    function renderClassNotes() {
+      const currentClass = getActiveClass();
+      const input = document.getElementById('classNotesInput');
+      if (currentClass && input) {
+        input.value = currentClass.notes || '';
       }
     }
 
@@ -851,6 +889,7 @@
         } else {
           studentsHtml = sortedStudents.map(student => {
             const isAbsent = student.present === false;
+            const hasComment = student.comment && student.comment.trim().length > 0;
 
             return `
               <div class="flex items-center justify-between p-2 rounded-2xl transition border ${isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}">
@@ -866,6 +905,8 @@
                   <span class="font-bold text-xs truncate ${isAbsent ? 'line-through text-slate-500' : 'text-slate-100'}">
                     ${escapeHtml(student.name)}
                   </span>
+
+                  ${hasComment ? `<span class="text-amber-400 text-xs shrink-0 cursor-pointer" title="Note: ${escapeHtml(student.comment)}"><i class="fa-solid fa-comment"></i></span>` : ''}
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">
@@ -991,7 +1032,8 @@
             name: name,
             seat: (table.students.length % 5) + 1,
             points: 0,
-            present: true
+            present: true,
+            comment: ''
           });
         });
       } else {
@@ -1003,7 +1045,8 @@
               name: name,
               seat: (table.students.length % 5) + 1,
               points: 0,
-              present: true
+              present: true,
+              comment: ''
             });
           });
         }
@@ -1097,6 +1140,7 @@
       document.getElementById('studentModalStudentId').value = '';
       document.getElementById('studentModalNameInput').value = '';
       document.getElementById('studentModalSeatSelect').value = '1';
+      document.getElementById('studentModalCommentInput').value = '';
       document.getElementById('studentModal').classList.remove('hidden');
     }
 
@@ -1113,6 +1157,7 @@
       document.getElementById('studentModalStudentId').value = studentId;
       document.getElementById('studentModalNameInput').value = student.name;
       document.getElementById('studentModalSeatSelect').value = student.seat || 1;
+      document.getElementById('studentModalCommentInput').value = student.comment || '';
       document.getElementById('studentModal').classList.remove('hidden');
     }
 
@@ -1125,6 +1170,7 @@
       const studentId = document.getElementById('studentModalStudentId').value;
       const nameInput = document.getElementById('studentModalNameInput').value.trim();
       const seatVal = parseInt(document.getElementById('studentModalSeatSelect').value, 10);
+      const commentInput = document.getElementById('studentModalCommentInput').value.trim();
 
       if (!nameInput) {
         alert("Please enter a student name.");
@@ -1140,6 +1186,7 @@
         if (student) {
           student.name = nameInput;
           student.seat = seatVal;
+          student.comment = commentInput;
         }
       } else {
         table.students.push({
@@ -1147,7 +1194,8 @@
           name: nameInput,
           seat: seatVal,
           points: 0,
-          present: true
+          present: true,
+          comment: commentInput
         });
       }
 
@@ -1282,6 +1330,7 @@
       appData.classes[id] = {
         id: id,
         name: name,
+        notes: '',
         rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
         tables: []
       };
@@ -1451,7 +1500,6 @@
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `ArtPoints_Roster_Backup_${new Date().toISOString().split('T')[0]}.json`);
-      document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
     }
