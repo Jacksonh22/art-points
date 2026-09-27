@@ -6,172 +6,234 @@
   <title>Art Points Studio Ed</title>
   <style>
     :root {
-      --primary: #4a90e2;
-      --primary-dark: #357abd;
-      --accent: #f39c12;
-      --danger: #e74c3c;
-      --success: #2ecc71;
-      --bg: #f8fafc;
+      --bg: #eef2f7;
       --panel: #ffffff;
-      --text: #1e293b;
-      --border: #e2e8f0;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      --text: #2c3e50;
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --border: #cbd5e1;
+      --radius: 14px;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 24px; }
-    .container { max-width: 1300px; margin: 0 auto; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+    .container { max-width: 1280px; margin: 0 auto; }
 
     header {
-      background: var(--panel);
-      padding: 20px 28px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      padding: 18px 24px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 15px;
     }
 
-    .title-group h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
-    .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #64748b; font-weight: 600; }
-    .badge.synced { background: #dcfce7; color: #15803d; }
+    .title-area { display: flex; align-items: center; gap: 12px; }
+    .title-area h1 { font-size: 1.75rem; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+    
+    .status-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #e2e8f0;
+      color: #475569;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-badge.synced { background: #d1fae5; color: #047857; }
 
-    .controls { display: flex; gap: 10px; align-items: center; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
     select, button, input {
-      padding: 10px 16px;
+      padding: 9px 16px;
       border-radius: 10px;
       border: 1px solid var(--border);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
       outline: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
 
-    select { background: #fff; cursor: pointer; }
-    button { background: var(--primary); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-    button:hover { opacity: 0.92; transform: translateY(-1px); }
+    select { background: #fff; cursor: pointer; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    button:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); }
+    button:active { transform: translateY(0); }
     button.secondary { background: #64748b; }
     button.success { background: var(--success); }
     button.warning { background: var(--accent); }
     button.danger { background: var(--danger); }
 
-    .grid { display: grid; grid-template-columns: 2.2fr 1fr; gap: 24px; }
+    .main-grid { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; }
+    @media (max-width: 950px) { .main-grid { grid-template-columns: 1fr; } }
 
     .card {
       background: var(--panel);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 22px;
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
     }
+    .card-header h2, .card-header h3 { color: #0f172a; font-weight: 800; }
 
-    .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .tables-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+    
     .table-box {
-      border: 1px solid var(--border);
+      border: 2px solid #e2e8f0;
       border-radius: 12px;
-      padding: 16px;
-      background: #fafafa;
+      padding: 14px;
+      background: #f8fafc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #1e293b;
     }
 
-    .table-title { font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-
+    .student-list { display: flex; flex-direction: column; gap: 8px; }
+    
     .student-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 8px 12px;
-      background: #fff;
+      background: #ffffff;
       border-radius: 8px;
-      border: 1px solid var(--border);
-      margin-bottom: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    
+    .student-card.absent { opacity: 0.45; background: #f1f5f9; text-decoration: line-through; }
+    .student-info { display: flex; align-items: center; gap: 10px; }
+    .seat-num {
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
     }
 
-    .student-card.absent { opacity: 0.4; text-decoration: line-through; }
-    .seat { background: #f1f5f9; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-right: 8px; }
-
-    .rubric-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-    .rubric-item {
+    .rubric-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .rubric-btn {
       padding: 12px 16px;
       border-radius: 10px;
-      border: 1px solid var(--border);
+      border: 2px solid #e2e8f0;
       background: #f8fafc;
+      color: #334155;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-weight: 700;
       cursor: pointer;
     }
-    .rubric-item.active { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 700; }
+    .rubric-btn.active { border-color: var(--success); background: #ecfdf5; color: #065f46; }
 
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
       display: none; align-items: center; justify-content: center; z-index: 1000;
     }
-    .modal { background: #fff; padding: 28px; border-radius: var(--radius); width: 100%; max-width: 460px; box-shadow: var(--shadow); }
-    .modal h3 { margin-bottom: 16px; }
-    .modal textarea { width: 100%; height: 120px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 16px; }
+    .modal { background: #fff; padding: 26px; border-radius: var(--radius); width: 100%; max-width: 480px; box-shadow: var(--shadow); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal textarea { width: 100%; height: 120px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; font-size: 0.95rem; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <div class="title-group">
+    <div class="title-area">
       <h1>🎨 Art Points Studio Ed</h1>
-      <span id="cloudBadge" class="badge">Local Storage</span>
+      <span id="cloudBadge" class="status-badge">💾 Local Storage</span>
     </div>
     <div class="controls">
       <select id="classSelect" onchange="switchClass()"></select>
-      <button class="success" onclick="openModal('classModal')">➕ Class</button>
+      <button class="success" onclick="openModal('classModal')">➕ New Class</button>
       <button class="warning" onclick="openModal('bulkModal')">📋 Bulk Import</button>
-      <button class="secondary" onclick="openModal('settingsModal')">⚙️ Settings</button>
+      <button class="secondary" onclick="openModal('settingsModal')">⚙️ Settings & Sync</button>
     </div>
   </header>
 
-  <div class="grid">
-    <div>
+  <div class="main-grid">
+    <div class="left-col">
       <div class="card">
         <div class="card-header">
-          <h2 id="activeClassName">Class View</h2>
+          <h2 id="activeClassName">Select a Class</h2>
           <div>
-            <button class="danger" onclick="deleteCurrentClass()">Delete Class</button>
+            <button class="secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="addTablePrompt()">+ Add Table</button>
+            <button class="danger" style="padding: 6px 12px; font-size: 0.85rem;" onclick="deleteCurrentClass()">Delete Class</button>
           </div>
         </div>
-        <div class="tables-grid" id="tablesGrid"></div>
+
+        <div class="tables-container" id="tablesGrid"></div>
       </div>
     </div>
 
-    <div>
+    <div class="right-col">
       <div class="card">
         <div class="card-header">
-          <h3>Daily Rubric</h3>
-          <span id="rubricScore" style="font-weight: 800; color: var(--primary);">0/5</span>
+          <h3>📋 Daily 5-Step Rubric</h3>
+          <span id="rubricScore" style="font-weight: 800; font-size: 1.2rem; color: var(--primary);">0/5</span>
         </div>
-        <div class="rubric-list">
-          <div class="rubric-item" onclick="toggleRubric(0)">1. Enter & Warmup <span>✓</span></div>
-          <div class="rubric-item" onclick="toggleRubric(1)">2. Instruction <span>✓</span></div>
-          <div class="rubric-item" onclick="toggleRubric(2)">3. Studio Time <span>✓</span></div>
-          <div class="rubric-item" onclick="toggleRubric(3)">4. Clean Up <span>✓</span></div>
-          <div class="rubric-item" onclick="toggleRubric(4)">5. Line Up <span>✓</span></div>
+        <div class="rubric-grid">
+          <div class="rubric-btn" onclick="toggleRubric(0)">1. Enter & Warmup <span>✓</span></div>
+          <div class="rubric-btn" onclick="toggleRubric(1)">2. Direct Instruction <span>✓</span></div>
+          <div class="rubric-btn" onclick="toggleRubric(2)">3. Studio Creation Time <span>✓</span></div>
+          <div class="rubric-btn" onclick="toggleRubric(3)">4. Clean Up & Materials <span>✓</span></div>
+          <div class="rubric-btn" onclick="toggleRubric(4)">5. Line Up & Dismissal <span>✓</span></div>
         </div>
-        <button class="success" style="width: 100%; justify-content: center;" onclick="awardClassPoint()">⭐ Award Class Point</button>
+        <button class="success" style="width: 100%; justify-content: center; padding: 12px;" onclick="awardClassPoint()">⭐ Award Whole Class Point</button>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Artist of the Day</h3>
+          <h3>🏆 Artist of the Day</h3>
         </div>
-        <button class="warning" style="width: 100%; justify-content: center;" onclick="pickRandomArtist()">🎲 Pick Present Student</button>
-        <div id="artistWinner" style="margin-top: 16px; text-align: center; font-size: 1.2rem; font-weight: 800; color: var(--accent);"></div>
+        <button class="warning" style="width: 100%; justify-content: center; padding: 12px;" onclick="pickRandomArtist()">🎲 Pick Present Student</button>
+        <div id="artistWinner" style="margin-top: 16px; text-align: center; font-size: 1.25rem; font-weight: 800; color: var(--accent);"></div>
       </div>
     </div>
   </div>
@@ -180,11 +242,15 @@
 <!-- Bulk Import Modal -->
 <div class="modal-overlay" id="bulkModal">
   <div class="modal">
-    <h3>📋 Bulk Add Roster</h3>
-    <textarea id="bulkInput" placeholder="Paste student names (comma or line separated)..."></textarea>
+    <div class="modal-header">
+      <h3>📋 Bulk Add Roster</h3>
+      <button class="secondary" onclick="closeModal('bulkModal')">✖</button>
+    </div>
+    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">Paste student names (separated by commas or new lines):</p>
+    <textarea id="bulkInput" placeholder="Alice Smith&#10;Bob Jones&#10;Charlie Brown"></textarea>
     <div style="display: flex; gap: 10px; justify-content: flex-end;">
       <button class="secondary" onclick="closeModal('bulkModal')">Cancel</button>
-      <button class="success" onclick="processBulkImport()">Import</button>
+      <button class="success" onclick="processBulkImport()">Import Roster</button>
     </div>
   </div>
 </div>
@@ -192,52 +258,85 @@
 <!-- Class Modal -->
 <div class="modal-overlay" id="classModal">
   <div class="modal">
-    <h3>➕ Create Class</h3>
+    <div class="modal-header">
+      <h3>➕ Create New Class</h3>
+      <button class="secondary" onclick="closeModal('classModal')">✖</button>
+    </div>
     <input type="text" id="newClassName" placeholder="e.g. Yellow-3rd Grade" style="width: 100%; margin-bottom: 16px;">
     <div style="display: flex; gap: 10px; justify-content: flex-end;">
       <button class="secondary" onclick="closeModal('classModal')">Cancel</button>
-      <button class="success" onclick="addClass()">Create</button>
+      <button class="success" onclick="addClass()">Create Class</button>
     </div>
   </div>
 </div>
 
-<!-- Settings Modal -->
+<!-- Settings & Google Sheets Sync Modal -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
-    <h3>⚙️ Google Sheets Sync</h3>
-    <input type="text" id="sheetsUrl" placeholder="Paste Google Web App URL here..." style="width: 100%; margin-bottom: 16px;">
-    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-      <button class="primary" onclick="syncToGoogleSheets()">📤 Save to Google Sheets</button>
-      <button class="warning" onclick="pullFromGoogleSheets()">📥 Load from Google Sheets</button>
+    <div class="modal-header">
+      <h3>⚙️ Settings & Google Sheets Sync</h3>
+      <button class="secondary" onclick="closeModal('settingsModal')">✖</button>
     </div>
+    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;"><strong>Google Web App URL:</strong></p>
+    <input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; margin-bottom: 16px;">
+    
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+      <button class="primary" onclick="syncToGoogleSheets()">📤 Save / Backup to Google Sheets</button>
+      <button class="warning" onclick="pullFromGoogleSheets()">📥 Restore from Google Sheets</button>
+    </div>
+    <hr style="margin-bottom: 16px; border: 0; border-top: 1px solid var(--border);">
     <div style="display: flex; gap: 10px; justify-content: space-between;">
-      <button class="secondary" onclick="exportJSON()">💾 Export Backup</button>
-      <button class="secondary" onclick="importJSON()">📂 Import Backup</button>
+      <button class="secondary" onclick="exportJSON()">💾 Export JSON</button>
+      <button class="secondary" onclick="importJSON()">📂 Import JSON</button>
     </div>
   </div>
 </div>
 
 <script>
   let appData = { classes: {}, activeClass: null, sheetsUrl: "" };
-  const KEYS = ['artRoomData', 'seatingChartData', 'appData'];
+  const STORAGE_KEYS = ['artRoomData', 'seatingChartData', 'appData'];
 
   function init() {
     loadData();
-    renderDropdown();
-    if (appData.activeClass && appData.classes[appData.activeClass]) renderClass();
+    renderClassDropdown();
+    if (appData.activeClass && appData.classes[appData.activeClass]) {
+      renderActiveClass();
+    }
   }
 
   function loadData() {
-    for (let k of KEYS) {
-      let raw = localStorage.getItem(k);
+    let found = false;
+    for (let key of STORAGE_KEYS) {
+      let raw = localStorage.getItem(key);
       if (raw) {
         try {
-          let p = JSON.parse(raw);
-          if (p.classes && Object.keys(p.classes).length > 0) { appData = p; break; }
+          let parsed = JSON.parse(raw);
+          if (parsed.classes && Object.keys(parsed.classes).length > 0) {
+            appData = parsed;
+            found = true;
+            break;
+          }
         } catch(e) {}
       }
     }
-    if (!appData.activeClass && Object.keys(appData.classes).length > 0) {
+
+    if (!found || !appData.classes || Object.keys(appData.classes).length === 0) {
+      appData.classes = {
+        "Sample Art Class": {
+          tables: {
+            "Table 1": [
+              { name: "Alex", points: 0, absent: false, seat: 1 },
+              { name: "Sam", points: 0, absent: false, seat: 2 }
+            ],
+            "Table 2": []
+          },
+          rubric: [false, false, false, false, false]
+        }
+      };
+      appData.activeClass = "Sample Art Class";
+    }
+
+    if (!appData.activeClass || !appData.classes[appData.activeClass]) {
       appData.activeClass = Object.keys(appData.classes)[0];
     }
     saveData();
@@ -245,20 +344,27 @@
 
   function saveData() {
     let json = JSON.stringify(appData);
-    KEYS.forEach(k => localStorage.setItem(k, json));
+    for (let key of STORAGE_KEYS) {
+      localStorage.setItem(key, json);
+    }
+    const badge = document.getElementById('cloudBadge');
     if (appData.sheetsUrl) {
-      document.getElementById('cloudBadge').className = 'badge synced';
-      document.getElementById('cloudBadge').innerText = 'Cloud Sync Active';
+      badge.classList.add('synced');
+      badge.innerText = "☁️ Google Sheets Connected";
+    } else {
+      badge.classList.remove('synced');
+      badge.innerText = "💾 Local Storage";
     }
   }
 
-  function renderDropdown() {
+  function renderClassDropdown() {
     const sel = document.getElementById('classSelect');
     sel.innerHTML = '';
-    for (let c in appData.classes) {
+    for (let className in appData.classes) {
       let opt = document.createElement('option');
-      opt.value = c; opt.innerText = c;
-      if (c === appData.activeClass) opt.selected = true;
+      opt.value = className;
+      opt.innerText = className;
+      if (className === appData.activeClass) opt.selected = true;
       sel.appendChild(opt);
     }
   }
@@ -266,159 +372,267 @@
   function switchClass() {
     appData.activeClass = document.getElementById('classSelect').value;
     saveData();
-    renderClass();
+    renderActiveClass();
   }
 
-  function renderClass() {
-    const cur = appData.classes[appData.activeClass];
+  function renderActiveClass() {
+    const current = appData.classes[appData.activeClass];
     document.getElementById('activeClassName').innerText = appData.activeClass;
-    const grid = document.getElementById('tablesGrid');
-    grid.innerHTML = '';
+    
+    const container = document.getElementById('tablesGrid');
+    container.innerHTML = '';
 
-    if (!cur.tables) cur.tables = { "Table 1": [], "Table 2": [] };
+    if (!current.tables || Object.keys(current.tables).length === 0) {
+      current.tables = { "Table 1": [], "Table 2": [], "Table 3": [], "Table 4": [] };
+    }
 
-    for (let t in cur.tables) {
-      let box = document.createElement('div');
-      box.className = 'table-box';
-      let html = `<div class="table-title"><span>${t}</span><div>
-        <button class="warning" style="padding: 2px 8px; font-size: 0.75rem;" onclick="addTablePoint('${t}')">+1 All</button>
-        <button class="secondary" style="padding: 2px 8px; font-size: 0.75rem;" onclick="addStudentPrompt('${t}')">+</button>
-      </div></div>`;
+    for (let tName in current.tables) {
+      let tBox = document.createElement('div');
+      tBox.className = 'table-box';
+      
+      let html = `<div class="table-header">
+        <span>${tName}</span>
+        <div>
+          <button class="warning" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addTablePoint('${tName}')">+1 Team</button>
+          <button class="secondary" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addStudentPrompt('${tName}')">+ Student</button>
+        </div>
+      </div><div class="student-list">`;
 
-      cur.tables[t].forEach((s, i) => {
+      current.tables[tName].forEach((s, idx) => {
         html += `<div class="student-card ${s.absent ? 'absent' : ''}">
-          <div style="display:flex; align-items:center;">
-            <span class="seat">${s.seat || i+1}</span>
-            <span><strong>${s.name}</strong> (${s.points || 0})</span>
+          <div class="student-info">
+            <span class="seat-num">${s.seat || idx + 1}</span>
+            <span><strong>${s.name}</strong> (${s.points || 0} pts)</span>
           </div>
           <div>
-            <button class="secondary" style="padding: 2px 6px; font-size: 0.7rem;" onclick="toggleAbsent('${t}', ${i})">${s.absent ? 'P' : 'A'}</button>
-            <button class="success" style="padding: 2px 6px; font-size: 0.7rem;" onclick="addPoint('${t}', ${i}, 1)">+1</button>
-            <button class="danger" style="padding: 2px 6px; font-size: 0.7rem;" onclick="deleteStudent('${t}', ${i})">×</button>
+            <button class="secondary" style="padding: 3px 7px; font-size: 0.7rem;" onclick="toggleAbsent('${tName}', ${idx})">${s.absent ? 'P' : 'A'}</button>
+            <button class="success" style="padding: 3px 7px; font-size: 0.7rem;" onclick="addPoint('${tName}', ${idx}, 1)">+1</button>
+            <button class="danger" style="padding: 3px 7px; font-size: 0.7rem;" onclick="deleteStudent('${tName}', ${idx})">🗑️</button>
           </div>
         </div>`;
       });
-      box.innerHTML = html;
-      grid.appendChild(box);
+
+      html += `</div>`;
+      tBox.innerHTML = html;
+      container.appendChild(tBox);
     }
 
-    if (!cur.rubric) cur.rubric = [false, false, false, false, false];
-    let cnt = 0;
-    document.querySelectorAll('.rubric-item').forEach((item, i) => {
-      if (cur.rubric[i]) { item.classList.add('active'); cnt++; }
-      else item.classList.remove('active');
+    if (!current.rubric) current.rubric = [false, false, false, false, false];
+    let activeCount = 0;
+    const btns = document.querySelectorAll('.rubric-btn');
+    btns.forEach((btn, idx) => {
+      if (current.rubric[idx]) {
+        btn.classList.add('active');
+        activeCount++;
+      } else {
+        btn.classList.remove('active');
+      }
     });
-    document.getElementById('rubricScore').innerText = `${cnt}/5`;
+    document.getElementById('rubricScore').innerText = `${activeCount}/5`;
+    if (appData.sheetsUrl) document.getElementById('sheetsUrl').value = appData.sheetsUrl;
   }
 
-  function addPoint(t, i, p) {
-    let s = appData.classes[appData.activeClass].tables[t][i];
-    if (!s.absent) s.points = (s.points || 0) + p;
-    saveData(); renderClass();
+  function addPoint(tName, idx, pts) {
+    let student = appData.classes[appData.activeClass].tables[tName][idx];
+    if (student.absent) return;
+    student.points = (student.points || 0) + pts;
+    saveData();
+    renderActiveClass();
   }
 
-  function addTablePoint(t) {
-    appData.classes[appData.activeClass].tables[t].forEach(s => { if (!s.absent) s.points = (s.points || 0) + 1; });
-    saveData(); renderClass();
+  function addTablePoint(tName) {
+    let students = appData.classes[appData.activeClass].tables[tName];
+    students.forEach(s => {
+      if (!s.absent) s.points = (s.points || 0) + 1;
+    });
+    saveData();
+    renderActiveClass();
   }
 
-  function toggleAbsent(t, i) {
-    let s = appData.classes[appData.activeClass].tables[t][i];
-    s.absent = !s.absent;
-    saveData(); renderClass();
+  function toggleAbsent(tName, idx) {
+    let student = appData.classes[appData.activeClass].tables[tName][idx];
+    student.absent = !student.absent;
+    saveData();
+    renderActiveClass();
   }
 
-  function deleteStudent(t, i) {
-    appData.classes[appData.activeClass].tables[t].splice(i, 1);
-    saveData(); renderClass();
-  }
-
-  function addStudentPrompt(t) {
-    let n = prompt("Student Name:");
-    if (n) {
-      appData.classes[appData.activeClass].tables[t].push({ name: n.trim(), points: 0, absent: false });
-      saveData(); renderClass();
+  function deleteStudent(tName, idx) {
+    if (confirm("Remove student?")) {
+      appData.classes[appData.activeClass].tables[tName].splice(idx, 1);
+      saveData();
+      renderActiveClass();
     }
   }
 
-  function toggleRubric(i) {
-    let cur = appData.classes[appData.activeClass];
-    if (!cur.rubric) cur.rubric = [false, false, false, false, false];
-    cur.rubric[i] = !cur.rubric[i];
-    saveData(); renderClass();
+  function addStudentPrompt(tName) {
+    let name = prompt("Student Name:");
+    if (name) {
+      appData.classes[appData.activeClass].tables[tName].push({
+        name: name.trim(),
+        points: 0,
+        absent: false,
+        seat: appData.classes[appData.activeClass].tables[tName].length + 1
+      });
+      saveData();
+      renderActiveClass();
+    }
+  }
+
+  function addTablePrompt() {
+    let name = prompt("Table Name (e.g. Table 5):");
+    if (name) {
+      appData.classes[appData.activeClass].tables[name] = [];
+      saveData();
+      renderActiveClass();
+    }
+  }
+
+  function toggleRubric(idx) {
+    let current = appData.classes[appData.activeClass];
+    if (!current.rubric) current.rubric = [false, false, false, false, false];
+    current.rubric[idx] = !current.rubric[idx];
+    saveData();
+    renderActiveClass();
   }
 
   function awardClassPoint() {
-    let cur = appData.classes[appData.activeClass];
-    for (let t in cur.tables) cur.tables[t].forEach(s => { if (!s.absent) s.points = (s.points || 0) + 1; });
-    saveData(); renderClass();
+    let current = appData.classes[appData.activeClass];
+    for (let t in current.tables) {
+      current.tables[t].forEach(s => {
+        if (!s.absent) s.points = (s.points || 0) + 1;
+      });
+    }
+    saveData();
+    renderActiveClass();
   }
 
   function pickRandomArtist() {
-    let list = [];
-    let cur = appData.classes[appData.activeClass];
-    for (let t in cur.tables) cur.tables[t].forEach(s => { if (!s.absent) list.push(s.name); });
-    document.getElementById('artistWinner').innerText = list.length ? `🎉 ${list[Math.floor(Math.random() * list.length)]} 🎉` : "No present students";
+    let present = [];
+    let current = appData.classes[appData.activeClass];
+    for (let t in current.tables) {
+      current.tables[t].forEach(s => {
+        if (!s.absent) present.push(s.name);
+      });
+    }
+    if (present.length === 0) {
+      document.getElementById('artistWinner').innerText = "No present students found!";
+      return;
+    }
+    let winner = present[Math.floor(Math.random() * present.length)];
+    document.getElementById('artistWinner').innerText = `🎉 ${winner} 🎉`;
   }
 
   function processBulkImport() {
     let txt = document.getElementById('bulkInput').value;
     if (!txt.trim()) return;
-    let names = txt.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length);
-    let cur = appData.classes[appData.activeClass];
-    let tables = Object.keys(cur.tables);
-    if (!tables.length) { cur.tables = { "Table 1": [], "Table 2": [] }; tables = Object.keys(cur.tables); }
+    
+    let names = txt.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length > 0);
+    let current = appData.classes[appData.activeClass];
+    let tables = Object.keys(current.tables);
+    if (tables.length === 0) {
+      current.tables = { "Table 1": [], "Table 2": [], "Table 3": [], "Table 4": [] };
+      tables = Object.keys(current.tables);
+    }
 
     names.forEach((name, i) => {
-      let target = tables[i % tables.length];
-      cur.tables[target].push({ name: name, points: 0, absent: false });
+      let targetTable = tables[i % tables.length];
+      current.tables[targetTable].push({
+        name: name,
+        points: 0,
+        absent: false,
+        seat: current.tables[targetTable].length + 1
+      });
     });
 
-    saveData(); renderClass(); closeModal('bulkModal');
+    saveData();
+    renderActiveClass();
+    closeModal('bulkModal');
+    document.getElementById('bulkInput').value = '';
   }
 
   function addClass() {
     let name = document.getElementById('newClassName').value.trim();
     if (!name) return;
-    appData.classes[name] = { tables: { "Table 1": [], "Table 2": [] }, rubric: [false, false, false, false, false] };
+    appData.classes[name] = {
+      tables: { "Table 1": [], "Table 2": [], "Table 3": [], "Table 4": [] },
+      rubric: [false, false, false, false, false]
+    };
     appData.activeClass = name;
-    saveData(); renderDropdown(); renderClass(); closeModal('classModal');
+    saveData();
+    renderClassDropdown();
+    renderActiveClass();
+    closeModal('classModal');
+    document.getElementById('newClassName').value = '';
   }
 
   function deleteCurrentClass() {
-    if (confirm(`Delete ${appData.activeClass}?`)) {
+    if (confirm(`Delete class "${appData.activeClass}"?`)) {
       delete appData.classes[appData.activeClass];
       let keys = Object.keys(appData.classes);
-      appData.activeClass = keys.length ? keys[0] : null;
-      saveData(); renderDropdown(); renderClass();
+      appData.activeClass = keys.length > 0 ? keys[0] : null;
+      saveData();
+      renderClassDropdown();
+      renderActiveClass();
     }
   }
 
   function syncToGoogleSheets() {
     let url = document.getElementById('sheetsUrl').value.trim();
-    if (!url) return;
+    if (!url) { alert("Please enter a Google Web App URL"); return; }
     appData.sheetsUrl = url;
     saveData();
-    fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(appData) });
+
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appData)
+    }).then(() => {
+      alert("Sent backup to Google Sheets!");
+    }).catch(e => alert("Error saving to Sheets: " + e));
   }
 
   function pullFromGoogleSheets() {
     let url = document.getElementById('sheetsUrl').value.trim();
-    if (!url) return;
-    fetch(url).then(r => r.json()).then(d => {
-      if (d && d.classes) { appData = d; saveData(); renderDropdown(); renderClass(); alert("Restored!"); }
-    });
+    if (!url) { alert("Please enter a Google Web App URL"); return; }
+    
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.classes) {
+          appData = data;
+          saveData();
+          renderClassDropdown();
+          renderActiveClass();
+          alert("Successfully restored rosters from Google Sheets!");
+        }
+      })
+      .catch(e => alert("Error loading from Sheets: " + e));
   }
 
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
   function exportJSON() {
-    let blob = new Blob([JSON.stringify(appData)], {type: 'application/json'});
-    let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'art_points_backup.json'; a.click();
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+    let dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "art_points_backup.json");
+    dlAnchor.click();
   }
   function importJSON() {
-    let raw = prompt("Paste backup text:");
-    if (raw) { try { appData = JSON.parse(raw); saveData(); renderDropdown(); renderClass(); } catch(e){} }
+    let raw = prompt("Paste your backup JSON text here:");
+    if (raw) {
+      try {
+        let parsed = JSON.parse(raw);
+        if (parsed.classes) {
+          appData = parsed;
+          saveData();
+          renderClassDropdown();
+          renderActiveClass();
+          alert("Data restored!");
+        }
+      } catch(e) { alert("Invalid JSON"); }
+    }
   }
 
   window.onload = init;
