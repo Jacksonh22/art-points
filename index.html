@@ -212,7 +212,7 @@
       </div>
 
       <!-- Dynamic Table Grid -->
-      <div id="tablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="tablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <!-- Dynamically rendered tables -->
       </div>
     </section>
@@ -908,10 +908,11 @@
                 ondragover="handleSeatDragOver(event)"
                 ondragleave="handleSeatDragLeave(event)"
                 ondrop="handleSeatDrop(event, '${table.id}', ${seatNum})"
-                class="flex items-center justify-between p-2 rounded-2xl transition border cursor-grab active:cursor-grabbing ${isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-indigo-500/50'}"
+                class="flex items-center justify-between gap-2 p-2 rounded-2xl transition border cursor-grab active:cursor-grabbing ${isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-indigo-500/50'}"
               >
-                <div class="flex items-center gap-2 overflow-hidden">
-                  <span class="text-slate-600 hover:text-slate-400 text-xs px-1"><i class="fa-solid fa-grip-vertical"></i></span>
+                <!-- Full Visibility Student Name Container -->
+                <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
+                  <span class="text-slate-600 hover:text-slate-400 text-xs px-0.5 shrink-0"><i class="fa-solid fa-grip-vertical"></i></span>
 
                   <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
                     Seat ${seatNum}
@@ -921,7 +922,7 @@
                     ${isAbsent ? 'ABSENT' : 'PRESENT'}
                   </button>
 
-                  <span class="font-bold text-xs truncate ${isAbsent ? 'line-through text-slate-500' : 'text-slate-100'}">
+                  <span class="font-bold text-xs leading-snug break-words flex-1 ${isAbsent ? 'line-through text-slate-500' : 'text-slate-100'}">
                     ${escapeHtml(student.name)}
                   </span>
 
