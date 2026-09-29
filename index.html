@@ -3,7 +3,7 @@
 <head>  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Art Points Studio Ed (Draggable Seats)</title>
+  <title>Art Points Studio Ed</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,17 +22,6 @@
         extend: {
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81',
-              950: '#1e1b4b',
-            }
           }
         }
       }
@@ -57,9 +46,6 @@
     ::-webkit-scrollbar-thumb {
       background: #334155;
       border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
     }
 
     #confettiCanvas {
@@ -100,7 +86,7 @@
           <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
             Art Points Studio <span class="bg-amber-400 text-slate-950 text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">Ed</span>
           </h1>
-          <p class="text-xs text-slate-400">Interactive Seating Chart & Classroom Manager</p>
+          <p class="text-xs text-slate-400">Seating Chart & Class Manager</p>
         </div>
       </div>
 
@@ -138,7 +124,7 @@
           <span>Artist Picker</span>
         </button>
 
-        <!-- Backup / Settings Button -->
+        <!-- Settings Button -->
         <button onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-2 rounded-xl border border-slate-700 transition" title="Backup & Settings">
           <i class="fa-solid fa-gear"></i>
         </button>
@@ -149,7 +135,7 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- DAILY CLASS RUBRIC TRACKER & CLASS NOTES -->
+    <!-- ROUTINE RUBRIC TRACKER -->
     <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div>
@@ -163,18 +149,13 @@
           </h2>
         </div>
 
-        <!-- Progress Bar -->
         <div class="w-full lg:w-72 bg-slate-950 rounded-full h-3 border border-slate-800 overflow-hidden">
           <div id="classProgressBar" class="bg-gradient-to-r from-indigo-500 via-amber-400 to-emerald-400 h-full w-0 transition-all duration-500"></div>
         </div>
       </div>
 
-      <!-- 5 Interactive Routine Steps -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="rubricButtonsContainer">
-        <!-- Rendered via Javascript -->
-      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="rubricButtonsContainer"></div>
 
-      <!-- CLASS-WIDE COMMENTS / NOTES SECTION -->
       <div class="pt-2 border-t border-slate-800/80">
         <div class="flex items-center justify-between mb-2">
           <label for="classNotesInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -193,10 +174,16 @@
           <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
             <i class="fa-solid fa-border-all text-indigo-400"></i> Studio Tables & Seating
           </h2>
-          <p class="text-xs text-slate-400">Drag student seats directly between tables or seat slots to reassign seats.</p>
+          <p class="text-xs text-slate-400">Drag student seats directly between tables. Mark inactive students to hide them without losing points.</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Toggle Inactive Students Visibility -->
+          <button onclick="toggleShowInactive()" id="toggleInactiveBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-eye-slash text-amber-400"></i>
+            <span id="toggleInactiveLabel">Show Inactive Students</span>
+          </button>
+
           <!-- Add Table Button -->
           <button onclick="openAddTableModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i>
@@ -212,15 +199,13 @@
       </div>
 
       <!-- Dynamic Table Grid -->
-      <div id="tablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <!-- Dynamically rendered tables -->
-      </div>
+      <div id="tablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"></div>
     </section>
 
   </main>
 
   <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
-    <p>Art Points Studio Ed &bull; Draggable Seats Enabled &bull; Safe & Local</p>
+    <p>Art Points Studio Ed &bull; Interactive Classroom Management</p>
   </footer>
 
   <!-- MODAL 1: BULK NAME UPLOAD MODAL -->
@@ -238,9 +223,7 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Target Table</label>
-          <select id="bulkImportTableSelect" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
-            <!-- Dynamically Populated -->
-          </select>
+          <select id="bulkImportTableSelect" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
         </div>
 
         <div>
@@ -260,7 +243,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: ARTIST OF THE DAY PICKER MODAL -->
+  <!-- MODAL 2: ARTIST PICKER MODAL -->
   <div id="artistModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl text-center space-y-5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -271,10 +254,8 @@
       </div>
 
       <div class="bg-slate-950 border-2 border-indigo-500/30 rounded-2xl p-6 min-h-[140px] flex flex-col items-center justify-center relative overflow-hidden">
-        <div id="artistWinnerDisplay" class="text-3xl font-black text-white tracking-tight">
-          Ready to Spin!
-        </div>
-        <div id="artistWinnerSub" class="text-xs text-slate-400 mt-1">Absent students are automatically excluded</div>
+        <div id="artistWinnerDisplay" class="text-3xl font-black text-white tracking-tight">Ready to Spin!</div>
+        <div id="artistWinnerSub" class="text-xs text-slate-400 mt-1">Absent & inactive students are excluded</div>
       </div>
 
       <div class="flex gap-2">
@@ -305,9 +286,7 @@
         </button>
       </div>
 
-      <div class="space-y-2 max-h-64 overflow-y-auto pr-1" id="classListContainer">
-        <!-- Dynamically rendered -->
-      </div>
+      <div class="space-y-2 max-h-64 overflow-y-auto pr-1" id="classListContainer"></div>
 
       <div class="flex justify-end pt-2 border-t border-slate-800">
         <button onclick="closeClassModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl">
@@ -336,6 +315,17 @@
           <input type="text" id="studentModalNameInput" placeholder="Enter student name..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
         </div>
 
+        <div class="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-xl">
+          <div>
+            <span class="block text-xs font-semibold text-slate-200">Student Status</span>
+            <span class="text-[10px] text-slate-400">Inactive students are hidden from seating view</span>
+          </div>
+          <select id="studentModalStatusSelect" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive (Hidden)</option>
+          </select>
+        </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Seat Position (1 - 5)</label>
           <select id="studentModalSeatSelect" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
@@ -356,6 +346,9 @@
       <div class="flex gap-2 pt-3 border-t border-slate-800">
         <button onclick="saveStudentFromModal()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition">
           Save Student
+        </button>
+        <button id="studentModalDeleteBtn" onclick="confirmDeleteStudentFromModal()" class="px-3 py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 font-bold text-xs rounded-xl border border-rose-500/30 transition">
+          Delete
         </button>
         <button onclick="closeStudentModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
           Cancel
@@ -399,6 +392,9 @@
         <button onclick="saveTableFromModal()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition">
           Save Table
         </button>
+        <button id="tableModalDeleteBtn" onclick="confirmDeleteTableFromModal()" class="px-3 py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 font-bold text-xs rounded-xl border border-rose-500/30 transition">
+          Delete
+        </button>
         <button onclick="closeTableModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
           Cancel
         </button>
@@ -406,7 +402,28 @@
     </div>
   </div>
 
-  <!-- MODAL 6: SETTINGS & BACKUP MODAL -->
+  <!-- MODAL 6: CUSTOM CONFIRMATION ACTION MODAL -->
+  <div id="confirmModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 shadow-2xl text-center space-y-4">
+      <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-rose-500/20">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h3 id="confirmModalTitle" class="font-bold text-lg text-white">Are you sure?</h3>
+        <p id="confirmModalMessage" class="text-xs text-slate-400 mt-1">This action cannot be undone.</p>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button id="confirmModalActionBtn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow transition">
+          Delete
+        </button>
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: SETTINGS MODAL -->
   <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -417,14 +434,13 @@
       </div>
 
       <div class="space-y-3">
-        <!-- Google Sheets Integration Card -->
         <div class="p-4 bg-slate-950 border border-emerald-500/30 rounded-2xl space-y-3">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-table-cells text-emerald-400"></i>
-            <span class="font-bold text-xs text-white">Google Sheets Automated Backup Sync</span>
+            <span class="font-bold text-xs text-white">Google Sheets Backup Sync</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            Connect to your Google Sheet using a Google Apps Script Web App to sync rosters, seat numbers, daily points, and comments.
+            Connect your Google Sheet Web App URL to back up rosters and daily points.
           </p>
 
           <div class="space-y-2">
@@ -436,7 +452,7 @@
             <div class="flex items-center justify-between pt-1">
               <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
                 <input type="checkbox" id="autoSyncCheckbox" class="rounded border-slate-800 text-emerald-500 focus:ring-emerald-500">
-                <span>Auto-sync when changes occur</span>
+                <span>Auto-sync changes</span>
               </label>
 
               <button onclick="saveGoogleSheetsSettings()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition">
@@ -447,16 +463,16 @@
         </div>
 
         <div class="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-          <div class="font-bold text-xs text-white">Export Local Roster JSON</div>
-          <p class="text-[11px] text-slate-400">Save a backup file of all your classes directly to your device.</p>
+          <div class="font-bold text-xs text-white">Export Local JSON</div>
+          <p class="text-[11px] text-slate-400">Download a backup file of all your classes.</p>
           <button onclick="exportDataJSON()" class="mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
             <i class="fa-solid fa-download mr-1"></i> Export Backup (.JSON)
           </button>
         </div>
 
         <div class="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
-          <div class="font-bold text-xs text-white">Import Local Roster JSON</div>
-          <p class="text-[11px] text-slate-400">Restore class rosters from a previously saved JSON file.</p>
+          <div class="font-bold text-xs text-white">Import Local JSON</div>
+          <p class="text-[11px] text-slate-400">Restore classes from a JSON file.</p>
           <input type="file" id="importJsonFileInput" accept=".json" onchange="importDataJSON(event)" class="hidden">
           <button onclick="document.getElementById('importJsonFileInput').click()" class="mt-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition">
             <i class="fa-solid fa-upload mr-1"></i> Choose Backup File
@@ -474,15 +490,15 @@
 
   <script>
     /* ==========================================================================
-       STORAGE KEYS & DEEP DATA MIGRATION ENGINE
+       PRIMARY STATE & GLOBAL VARS
        ========================================================================== */
     const PRIMARY_STORAGE_KEY = 'ART_POINTS_STUDIO_ED_DATA';
-    const LEGACY_KEYS = ['seatingChartData', 'artRoomData', 'appData'];
 
     const DEFAULT_APP_STATE = {
       activeClassId: 'class_default',
       googleWebAppUrl: '',
       autoSync: false,
+      showInactiveStudents: false,
       classes: {
         'class_default': {
           id: 'class_default',
@@ -499,21 +515,17 @@
 
     let appData = null;
     let draggedSeatInfo = null;
+    let pendingConfirmAction = null;
 
-    /* ==========================================================================
-       WEB AUDIO SYNTHESIZER
-       ========================================================================== */
+    /* WEB AUDIO SYNTHESIZER */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playSound(type) {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       const now = audioCtx.currentTime;
 
       if (type === 'ding') {
@@ -547,72 +559,18 @@
       }
     }
 
-    /* ==========================================================================
-       DATA LOADING & COMBINED MIGRATION
-       ========================================================================== */
+    /* DATA LOADING & VALIDATION */
     function loadAndMigrateData() {
-      let combinedClasses = {};
-      let foundAnyData = false;
-      let webAppUrl = '';
-      let autoSync = false;
-
       const primaryData = localStorage.getItem(PRIMARY_STORAGE_KEY);
       if (primaryData) {
         try {
-          const parsed = JSON.parse(primaryData);
-          if (parsed) {
-            if (parsed.classes) {
-              Object.assign(combinedClasses, parsed.classes);
-              foundAnyData = true;
-            }
-            if (parsed.googleWebAppUrl) webAppUrl = parsed.googleWebAppUrl;
-            if (parsed.autoSync !== undefined) autoSync = parsed.autoSync;
-          }
-        } catch (e) { console.error("Error reading primary data", e); }
+          appData = JSON.parse(primaryData);
+        } catch (e) {
+          console.error("Error reading storage", e);
+        }
       }
 
-      LEGACY_KEYS.forEach(key => {
-        const legacyRaw = localStorage.getItem(key);
-        if (legacyRaw) {
-          try {
-            const parsed = JSON.parse(legacyRaw);
-            if (parsed && parsed.classes) {
-              Object.entries(parsed.classes).forEach(([clsId, clsObj]) => {
-                if (!combinedClasses[clsId]) {
-                  combinedClasses[clsId] = clsObj;
-                } else {
-                  if (clsObj.tables && Array.isArray(clsObj.tables)) {
-                    clsObj.tables.forEach(legacyTable => {
-                      let existingTable = combinedClasses[clsId].tables.find(t => t.id === legacyTable.id || t.name === legacyTable.name);
-                      if (!existingTable) {
-                        combinedClasses[clsId].tables.push(legacyTable);
-                      } else {
-                        if (legacyTable.students && Array.isArray(legacyTable.students)) {
-                          legacyTable.students.forEach(s => {
-                            if (!existingTable.students.some(es => es.id === s.id || es.name === s.name)) {
-                              existingTable.students.push(s);
-                            }
-                          });
-                        }
-                      }
-                    });
-                  }
-                }
-              });
-              foundAnyData = true;
-            }
-          } catch (e) { console.error(`Error parsing legacy key ${key}`, e); }
-        }
-      });
-
-      if (foundAnyData && Object.keys(combinedClasses).length > 0) {
-        appData = {
-          activeClassId: Object.keys(combinedClasses)[0],
-          googleWebAppUrl: webAppUrl,
-          autoSync: autoSync,
-          classes: combinedClasses
-        };
-      } else {
+      if (!appData) {
         appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
       }
 
@@ -634,6 +592,7 @@
         appData.activeClassId = Object.keys(appData.classes)[0];
       }
 
+      if (appData.showInactiveStudents === undefined) appData.showInactiveStudents = false;
       if (appData.googleWebAppUrl === undefined) appData.googleWebAppUrl = '';
       if (appData.autoSync === undefined) appData.autoSync = false;
 
@@ -641,13 +600,7 @@
 
       Object.values(appData.classes).forEach(cls => {
         if (cls.notes === undefined) cls.notes = '';
-
-        if (!cls.tables || !Array.isArray(cls.tables)) {
-          cls.tables = [
-            { id: 't_default1', name: 'Table 1', color: 'red', dailyPoints: 0, students: [] },
-            { id: 't_default2', name: 'Table 2', color: 'blue', dailyPoints: 0, students: [] }
-          ];
-        }
+        if (!cls.tables || !Array.isArray(cls.tables)) cls.tables = [];
 
         if (!cls.rubricScore || cls.rubricScore.date !== today) {
           cls.rubricScore = { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today };
@@ -659,6 +612,7 @@
 
           table.students.forEach((student, index) => {
             if (student.present === undefined) student.present = true;
+            if (student.status === undefined) student.status = 'active'; // active or inactive
             if (!student.seat) student.seat = (index % 5) + 1;
             if (student.points === undefined) student.points = 0;
             if (student.comment === undefined) student.comment = '';
@@ -691,16 +645,13 @@
       }
     }
 
-    /* ==========================================================================
-       GOOGLE SHEETS BACKUP API SYNC ENGINE
-       ========================================================================== */
+    /* GOOGLE SHEETS API SYNC */
     async function syncWithGoogleSheets(isBackground = false) {
       const url = appData.googleWebAppUrl;
       const syncBtnText = document.getElementById('syncButtonText');
 
       if (!url) {
         if (!isBackground) {
-          alert("Please configure your Google Web App Deployment URL inside Settings first.");
           openSettingsModal();
         }
         return;
@@ -725,7 +676,6 @@
         console.error("Google Sheets Sync failed:", err);
         if (!isBackground) {
           if (syncBtnText) syncBtnText.textContent = "Sync Failed";
-          alert("Could not sync with Google Sheets. Check your Web App deployment URL.");
           setTimeout(() => { if (syncBtnText) syncBtnText.textContent = "Sheets Sync"; }, 2000);
         }
       }
@@ -739,29 +689,31 @@
       appData.autoSync = autoSyncCheck;
 
       saveData(false);
-      alert("Google Sheets settings saved successfully!");
       if (urlInput) syncWithGoogleSheets();
     }
 
-    /* ==========================================================================
-       RENDERERS
-       ========================================================================== */
+    /* RENDERERS */
     function renderApp() {
       renderClassSelect();
       renderDateBadge();
       renderClassRubric();
       renderClassNotes();
       renderTablesGrid();
-      populateSettingsInputs();
+      updateInactiveToggleButton();
     }
 
-    function populateSettingsInputs() {
-      if (document.getElementById('googleWebAppUrlInput')) {
-        document.getElementById('googleWebAppUrlInput').value = appData.googleWebAppUrl || '';
+    function updateInactiveToggleButton() {
+      const btnLabel = document.getElementById('toggleInactiveLabel');
+      if (btnLabel) {
+        btnLabel.textContent = appData.showInactiveStudents ? "Hide Inactive Students" : "Show Inactive Students";
       }
-      if (document.getElementById('autoSyncCheckbox')) {
-        document.getElementById('autoSyncCheckbox').checked = appData.autoSync || false;
-      }
+    }
+
+    function toggleShowInactive() {
+      appData.showInactiveStudents = !appData.showInactiveStudents;
+      saveData(false);
+      updateInactiveToggleButton();
+      renderTablesGrid();
     }
 
     function renderDateBadge() {
@@ -798,9 +750,7 @@
       }
     }
 
-    /* ==========================================================================
-       ROUTINE RUBRIC ENGINE
-       ========================================================================== */
+    /* ROUTINE RUBRIC ENGINE */
     const RUBRIC_STEPS = [
       { key: 'warmup', label: '1. Enter / Warm Up', icon: 'fa-door-open' },
       { key: 'instruction', label: '2. Instruction', icon: 'fa-chalkboard' },
@@ -856,9 +806,7 @@
       renderClassRubric();
     }
 
-    /* ==========================================================================
-       TABLES, SEATING GRID & DRAG-AND-DROP LOGIC
-       ========================================================================== */
+    /* TABLES & SEATING GRID */
     const COLOR_CLASSES = {
       red: { border: 'border-red-500/40', bg: 'bg-red-500/10' },
       orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10' },
@@ -891,13 +839,15 @@
         const tableCard = document.createElement('div');
         tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all`;
 
-        // Render 5 interactive Seat Slots per table
         let seatsHtml = '';
+        const visibleStudents = table.students.filter(s => appData.showInactiveStudents || s.status !== 'inactive');
+
         for (let seatNum = 1; seatNum <= 5; seatNum++) {
-          const student = table.students.find(s => parseInt(s.seat, 10) === seatNum);
+          const student = visibleStudents.find(s => parseInt(s.seat, 10) === seatNum);
 
           if (student) {
             const isAbsent = student.present === false;
+            const isInactive = student.status === 'inactive';
             const hasComment = student.comment && student.comment.trim().length > 0;
 
             seatsHtml += `
@@ -908,9 +858,8 @@
                 ondragover="handleSeatDragOver(event)"
                 ondragleave="handleSeatDragLeave(event)"
                 ondrop="handleSeatDrop(event, '${table.id}', ${seatNum})"
-                class="flex items-center justify-between gap-2 p-2 rounded-2xl transition border cursor-grab active:cursor-grabbing ${isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-indigo-500/50'}"
+                class="flex items-center justify-between gap-2 p-2 rounded-2xl transition border cursor-grab active:cursor-grabbing ${isInactive ? 'bg-slate-950/20 border-amber-500/30 opacity-60' : (isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-indigo-500/50')}"
               >
-                <!-- Full Visibility Student Name Container -->
                 <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
                   <span class="text-slate-600 hover:text-slate-400 text-xs px-0.5 shrink-0"><i class="fa-solid fa-grip-vertical"></i></span>
 
@@ -918,29 +867,32 @@
                     Seat ${seatNum}
                   </span>
 
-                  <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
-                    ${isAbsent ? 'ABSENT' : 'PRESENT'}
-                  </button>
+                  ${isInactive ? `
+                    <button onclick="toggleStudentStatus('${table.id}', '${student.id}')" title="Student is Inactive/Hidden. Click to activate." class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
+                      INACTIVE
+                    </button>
+                  ` : `
+                    <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+                      ${isAbsent ? 'ABSENT' : 'PRESENT'}
+                    </button>
+                  `}
 
-                  <span class="font-bold text-xs leading-snug break-words flex-1 ${isAbsent ? 'line-through text-slate-500' : 'text-slate-100'}">
+                  <span class="font-bold text-xs leading-snug break-words flex-1 ${isAbsent || isInactive ? 'line-through text-slate-500' : 'text-slate-100'}">
                     ${escapeHtml(student.name)}
                   </span>
 
                   ${hasComment ? `<span class="text-amber-400 text-xs shrink-0 cursor-pointer" title="Note: ${escapeHtml(student.comment)}"><i class="fa-solid fa-comment"></i></span>` : ''}
                 </div>
 
-                <!-- Individual Student Points Control -->
                 <div class="flex items-center gap-1 shrink-0">
-                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
-                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center" title="Individual Points">${student.points || 0}</span>
-                  <button ${isAbsent ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center hover:bg-indigo-500 disabled:opacity-30">+</button>
-                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1"><i class="fa-solid fa-pen"></i></button>
-                  <button onclick="deleteStudent('${table.id}', '${student.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
+                  <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
+                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${student.points || 0}</span>
+                  <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center hover:bg-indigo-500 disabled:opacity-30">+</button>
+                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1" title="Edit / Hide / Delete Student"><i class="fa-solid fa-pen"></i></button>
                 </div>
               </div>
             `;
           } else {
-            // Empty Seat Drop Zone
             seatsHtml += `
               <div 
                 ondragover="handleSeatDragOver(event)"
@@ -950,7 +902,7 @@
               >
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-900 text-slate-600 border border-slate-800 shrink-0">Seat ${seatNum}</span>
-                  <span class="italic text-[11px] text-slate-600">Empty Seat (Drag student here)</span>
+                  <span class="italic text-[11px] text-slate-600">Empty Seat</span>
                 </div>
                 <button onclick="openAddStudentModal('${table.id}', ${seatNum})" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 transition">
                   + Seat
@@ -962,40 +914,35 @@
 
         tableCard.innerHTML = `
           <div class="space-y-3">
-            <!-- Table Header -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full ${colorStyle.bg} border ${colorStyle.border}"></span>
                 <h3 class="font-black text-base text-white tracking-tight">${escapeHtml(table.name)}</h3>
               </div>
               <div class="flex items-center gap-1">
-                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="deleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs" title="Edit Table"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="triggerDeleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs" title="Delete Table"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>
 
-            <!-- Table Collective Group Points Header Bar -->
             <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 rounded-2xl p-2.5">
               <div class="flex items-center gap-2">
                 <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
-                <span class="text-xs font-bold text-slate-200">Table Group Points</span>
+                <span class="text-xs font-bold text-slate-200">Group Points</span>
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="addTablePoints('${table.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center hover:bg-slate-700">-</button>
-                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20" title="Table Group Points">${table.dailyPoints || 0} pts</span>
-                <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300" title="+1 Table Group Point">+1 Table Points</button>
+                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">${table.dailyPoints || 0} pts</span>
+                <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300">+1 Table</button>
               </div>
             </div>
           </div>
 
-          <!-- Seats & Students Container -->
           <div class="space-y-2 flex-1">
             <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-              <span>Seating Chart (${table.students.length} / 5)</span>
-              
-              <!-- Bulk Individual Points Button for All Students at Table -->
+              <span>Seating Chart (${visibleStudents.length} Students)</span>
               <button onclick="distributeTablePointsToPresent('${table.id}')" class="text-amber-400 hover:text-amber-300 font-bold normal-case flex items-center gap-1 text-[11px] bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded-lg border border-amber-400/30 transition">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> +1 All Students
+                <i class="fa-solid fa-wand-magic-sparkles"></i> +1 All Active
               </button>
             </div>
             
@@ -1012,7 +959,7 @@
       });
     }
 
-    /* DRAG AND DROP HANDLERS (SEAT LEVEL DRAG & DROP) */
+    /* DRAG AND DROP HANDLERS */
     function handleSeatDragStart(e, sourceTableId, sourceSeat, studentId) {
       draggedSeatInfo = { sourceTableId, sourceSeat, studentId };
       e.target.classList.add('dragging');
@@ -1057,7 +1004,6 @@
       const existingOccupant = targetTable.students.find(s => parseInt(s.seat, 10) === targetSeat);
 
       if (existingOccupant) {
-        // Swap seats between students
         existingOccupant.seat = sourceSeat;
         student.seat = targetSeat;
 
@@ -1069,7 +1015,6 @@
           sourceTable.students.push(existingOccupant);
         }
       } else {
-        // Move to empty seat
         student.seat = targetSeat;
         if (sourceTableId !== targetTableId) {
           sourceTable.students = sourceTable.students.filter(s => s.id !== student.id);
@@ -1082,9 +1027,7 @@
       renderTablesGrid();
     }
 
-    /* ==========================================================================
-       BULK ROSTER IMPORT HANDLER
-       ========================================================================== */
+    /* BULK ROSTER IMPORT */
     function openBulkImportModal() {
       const select = document.getElementById('bulkImportTableSelect');
       select.innerHTML = '';
@@ -1093,7 +1036,7 @@
 
       const autoOption = document.createElement('option');
       autoOption.value = 'AUTO_DISTRIBUTE';
-      autoOption.textContent = '✨ Distribute evenly across all tables';
+      autoOption.textContent = '✨ Distribute evenly across tables';
       select.appendChild(autoOption);
 
       currentClass.tables.forEach(table => {
@@ -1115,17 +1058,10 @@
       const text = document.getElementById('bulkImportTextarea').value;
       const targetTableId = document.getElementById('bulkImportTableSelect').value;
 
-      if (!text || text.trim() === '') {
-        alert("Please paste student names first.");
-        return;
-      }
+      if (!text || text.trim() === '') return;
 
       const rawNames = text.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length > 0);
-
-      if (rawNames.length === 0) {
-        alert("No valid student names found.");
-        return;
-      }
+      if (rawNames.length === 0) return;
 
       const currentClass = getActiveClass();
 
@@ -1149,6 +1085,7 @@
             seat: availableSeat,
             points: 0,
             present: true,
+            status: 'active',
             comment: ''
           });
         });
@@ -1163,6 +1100,7 @@
               seat: availableSeat,
               points: 0,
               present: true,
+              status: 'active',
               comment: ''
             });
           });
@@ -1176,16 +1114,14 @@
     }
 
     function getFirstAvailableSeat(table) {
-      const occupiedSeats = table.students.map(s => parseInt(s.seat, 10));
+      const occupiedSeats = table.students.filter(s => s.status !== 'inactive').map(s => parseInt(s.seat, 10));
       for (let s = 1; s <= 5; s++) {
         if (!occupiedSeats.includes(s)) return s;
       }
       return table.students.length + 1;
     }
 
-    /* ==========================================================================
-       STUDENT & ATTENDANCE ACTIONS
-       ========================================================================== */
+    /* STUDENT & ATTENDANCE ACTIONS */
     function toggleAttendance(tableId, studentId) {
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
@@ -1199,13 +1135,26 @@
       }
     }
 
+    function toggleStudentStatus(tableId, studentId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (student) {
+        student.status = student.status === 'inactive' ? 'active' : 'inactive';
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
     function addStudentPoint(tableId, studentId, delta) {
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
       const student = table.students.find(s => s.id === studentId);
-      if (student && student.present !== false) {
+      if (student && student.present !== false && student.status !== 'inactive') {
         student.points = Math.max(0, (student.points || 0) + delta);
         if (delta > 0) playSound('ding');
         else playSound('dong');
@@ -1233,7 +1182,7 @@
 
       let awarded = false;
       table.students.forEach(student => {
-        if (student.present !== false) {
+        if (student.present !== false && student.status !== 'inactive') {
           student.points = (student.points || 0) + 1;
           awarded = true;
         }
@@ -1247,17 +1196,35 @@
     }
 
     function resetDailyTablePoints() {
-      if (confirm("Reset daily table group points for all tables in this class?")) {
+      openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
         const currentClass = getActiveClass();
         currentClass.tables.forEach(t => t.dailyPoints = 0);
         saveData();
         renderTablesGrid();
-      }
+      });
     }
 
-    /* ==========================================================================
-       MODAL HANDLERS
-       ========================================================================== */
+    /* CUSTOM CONFIRMATION MODAL ENGINE */
+    function openCustomConfirm(title, message, onConfirm) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+      pendingConfirmAction = onConfirm;
+      
+      const btn = document.getElementById('confirmModalActionBtn');
+      btn.onclick = function() {
+        if (pendingConfirmAction) pendingConfirmAction();
+        closeConfirmModal();
+      };
+
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      pendingConfirmAction = null;
+    }
+
+    /* STUDENT MODAL & DELETION */
     function openAddStudentModal(tableId, preferredSeat = null) {
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
@@ -1267,8 +1234,10 @@
       document.getElementById('studentModalTableId').value = tableId;
       document.getElementById('studentModalStudentId').value = '';
       document.getElementById('studentModalNameInput').value = '';
+      document.getElementById('studentModalStatusSelect').value = 'active';
       document.getElementById('studentModalSeatSelect').value = targetSeat > 5 ? '5' : targetSeat;
       document.getElementById('studentModalCommentInput').value = '';
+      document.getElementById('studentModalDeleteBtn').classList.add('hidden');
       document.getElementById('studentModal').classList.remove('hidden');
     }
 
@@ -1284,8 +1253,10 @@
       document.getElementById('studentModalTableId').value = tableId;
       document.getElementById('studentModalStudentId').value = studentId;
       document.getElementById('studentModalNameInput').value = student.name;
+      document.getElementById('studentModalStatusSelect').value = student.status || 'active';
       document.getElementById('studentModalSeatSelect').value = student.seat || 1;
       document.getElementById('studentModalCommentInput').value = student.comment || '';
+      document.getElementById('studentModalDeleteBtn').classList.remove('hidden');
       document.getElementById('studentModal').classList.remove('hidden');
     }
 
@@ -1297,13 +1268,11 @@
       const tableId = document.getElementById('studentModalTableId').value;
       const studentId = document.getElementById('studentModalStudentId').value;
       const nameInput = document.getElementById('studentModalNameInput').value.trim();
+      const statusVal = document.getElementById('studentModalStatusSelect').value;
       const seatVal = parseInt(document.getElementById('studentModalSeatSelect').value, 10);
       const commentInput = document.getElementById('studentModalCommentInput').value.trim();
 
-      if (!nameInput) {
-        alert("Please enter a student name.");
-        return;
-      }
+      if (!nameInput) return;
 
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
@@ -1313,6 +1282,7 @@
         const student = table.students.find(s => s.id === studentId);
         if (student) {
           student.name = nameInput;
+          student.status = statusVal;
           student.seat = seatVal;
           student.comment = commentInput;
         }
@@ -1321,6 +1291,7 @@
           id: 'student_' + Date.now(),
           name: nameInput,
           seat: seatVal,
+          status: statusVal,
           points: 0,
           present: true,
           comment: commentInput
@@ -1332,24 +1303,33 @@
       closeStudentModal();
     }
 
-    function deleteStudent(tableId, studentId) {
+    function confirmDeleteStudentFromModal() {
+      const tableId = document.getElementById('studentModalTableId').value;
+      const studentId = document.getElementById('studentModalStudentId').value;
+      if (!tableId || !studentId) return;
+
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
       const student = table.students.find(s => s.id === studentId);
-      if (student && confirm(`Delete ${student.name} from roster?`)) {
+      if (!student) return;
+
+      closeStudentModal();
+      openCustomConfirm(`Delete ${student.name}?`, "This will permanently remove the student and their points.", () => {
         table.students = table.students.filter(s => s.id !== studentId);
         saveData();
         renderTablesGrid();
-      }
+      });
     }
 
+    /* TABLE MODAL & DELETION */
     function openAddTableModal() {
       document.getElementById('tableModalTitle').innerHTML = '<i class="fa-solid fa-plus text-emerald-400"></i> Add Studio Table';
       document.getElementById('tableModalTableId').value = '';
       document.getElementById('tableModalNameInput').value = '';
       document.getElementById('tableModalColorSelect').value = 'red';
+      document.getElementById('tableModalDeleteBtn').classList.add('hidden');
       document.getElementById('tableModal').classList.remove('hidden');
     }
 
@@ -1362,6 +1342,7 @@
       document.getElementById('tableModalTableId').value = tableId;
       document.getElementById('tableModalNameInput').value = table.name;
       document.getElementById('tableModalColorSelect').value = table.color || 'blue';
+      document.getElementById('tableModalDeleteBtn').classList.remove('hidden');
       document.getElementById('tableModal').classList.remove('hidden');
     }
 
@@ -1374,10 +1355,7 @@
       const nameInput = document.getElementById('tableModalNameInput').value.trim();
       const colorVal = document.getElementById('tableModalColorSelect').value;
 
-      if (!nameInput) {
-        alert("Please enter a table name.");
-        return;
-      }
+      if (!nameInput) return;
 
       const currentClass = getActiveClass();
 
@@ -1402,16 +1380,25 @@
       closeTableModal();
     }
 
-    function deleteTable(tableId) {
+    function triggerDeleteTable(tableId) {
       const currentClass = getActiveClass();
       const table = currentClass.tables.find(t => t.id === tableId);
-      if (table && confirm(`Are you sure you want to delete ${table.name}?`)) {
+      if (!table) return;
+
+      openCustomConfirm(`Delete ${table.name}?`, "All students assigned to this table will also be deleted.", () => {
         currentClass.tables = currentClass.tables.filter(t => t.id !== tableId);
         saveData();
         renderTablesGrid();
-      }
+      });
     }
 
+    function confirmDeleteTableFromModal() {
+      const tableId = document.getElementById('tableModalTableId').value;
+      closeTableModal();
+      if (tableId) triggerDeleteTable(tableId);
+    }
+
+    /* CLASS MODAL & DELETION */
     function openClassModal() {
       renderClassListInModal();
       document.getElementById('classModal').classList.remove('hidden');
@@ -1440,8 +1427,8 @@
           </div>
 
           <div class="flex items-center gap-1">
-            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs" title="Rename Class"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="triggerDeleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs" title="Delete Class"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
 
@@ -1483,30 +1470,30 @@
       }
     }
 
-    function deleteClass(classId) {
+    function triggerDeleteClass(classId) {
       if (Object.keys(appData.classes).length <= 1) {
         alert("You must keep at least one active class.");
         return;
       }
 
       const cls = appData.classes[classId];
-      if (cls && confirm(`Delete class "${cls.name}"?`)) {
+      if (!cls) return;
+
+      closeClassModal();
+      openCustomConfirm(`Delete "${cls.name}"?`, "This will permanently remove the entire class roster and settings.", () => {
         delete appData.classes[classId];
         if (appData.activeClassId === classId) {
           appData.activeClassId = Object.keys(appData.classes)[0];
         }
         saveData();
         renderApp();
-        renderClassListInModal();
-      }
+      });
     }
 
-    /* ==========================================================================
-       ARTIST OF THE DAY RANDOM PICKER
-       ========================================================================== */
+    /* ARTIST OF THE DAY RANDOM PICKER */
     function openArtistModal() {
       document.getElementById('artistWinnerDisplay').textContent = "Ready to Spin!";
-      document.getElementById('artistWinnerSub').textContent = "Absent students are automatically excluded";
+      document.getElementById('artistWinnerSub').textContent = "Absent & inactive students are excluded";
       document.getElementById('artistModal').classList.remove('hidden');
     }
 
@@ -1524,7 +1511,7 @@
 
       currentClass.tables.forEach(table => {
         table.students.forEach(student => {
-          if (student.present !== false) {
+          if (student.present !== false && student.status !== 'inactive') {
             presentStudents.push({ ...student, tableName: table.name });
           }
         });
@@ -1534,8 +1521,8 @@
       const sub = document.getElementById('artistWinnerSub');
 
       if (presentStudents.length === 0) {
-        display.textContent = "No Present Students!";
-        sub.textContent = "Mark at least 1 student as present to pick an artist.";
+        display.textContent = "No Active Students!";
+        sub.textContent = "Mark at least 1 student as active & present.";
         playSound('dong');
         return;
       }
@@ -1611,11 +1598,10 @@
       animate();
     }
 
-    /* ==========================================================================
-       SETTINGS & JSON BACKUP EXPORT / IMPORT
-       ========================================================================== */
+    /* SETTINGS & BACKUP */
     function openSettingsModal() {
-      populateSettingsInputs();
+      document.getElementById('googleWebAppUrlInput').value = appData.googleWebAppUrl || '';
+      document.getElementById('autoSyncCheckbox').checked = appData.autoSync || false;
       document.getElementById('settingsModal').classList.remove('hidden');
     }
 
@@ -1642,13 +1628,10 @@
             validateAndSanitizeState();
             saveData(true);
             renderApp();
-            alert("Backup imported successfully!");
             closeSettingsModal();
-          } else {
-            alert("Invalid backup file format.");
           }
         } catch (err) {
-          alert("Error parsing JSON backup file.");
+          console.error("Error parsing JSON backup.");
         }
       };
       if (event.target.files[0]) {
@@ -1662,9 +1645,7 @@
       });
     }
 
-    /* ==========================================================================
-       INITIALIZATION
-       ========================================================================== */
+    /* INIT */
     window.onload = function() {
       loadAndMigrateData();
       renderApp();
