@@ -84,12 +84,6 @@
     input[type=number] {
       -moz-appearance: textfield;
     }
-
-    /* Custom dark styling for date input */
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-      cursor: pointer;
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
@@ -311,21 +305,6 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <!-- DATE SELECTOR TRACKER -->
-          <div class="flex items-center gap-1.5 bg-slate-900 border border-amber-500/30 px-3 py-1.5 rounded-xl shadow">
-            <i class="fa-solid fa-calendar-day text-amber-400 text-xs"></i>
-            <span class="text-xs font-bold text-slate-300">Date:</span>
-            <input 
-              type="date" 
-              id="pointsDatePicker" 
-              onchange="changePointsDate(this.value)" 
-              class="bg-slate-950 text-amber-300 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-slate-800 focus:outline-none focus:border-amber-400 cursor-pointer"
-            />
-            <button onclick="setPointsDateToToday()" class="text-[10px] font-bold text-indigo-300 hover:text-white bg-indigo-600/20 hover:bg-indigo-600/40 px-2 py-0.5 rounded-lg transition">
-              Today
-            </button>
-          </div>
-
           <button onclick="toggleShowInactive()" id="toggleInactiveBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-eye-slash text-amber-400"></i>
             <span id="toggleInactiveLabel">Show Inactive Students</span>
@@ -338,7 +317,7 @@
           
           <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
             <i class="fa-solid fa-rotate-left text-slate-400"></i>
-            <span>Reset Selected Date Points</span>
+            <span>Reset Daily Points</span>
           </button>
         </div>
       </div>
@@ -650,7 +629,7 @@
           vocab: '',
           materials: '',
           notes: '',
-          history: {}, // Holds date-specific scores, table points, and student points
+          rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
           tables: [
             { id: 't_red', name: 'Red Table', color: 'red', dailyPoints: 0, students: [] },
             { id: 't_blue', name: 'Blue Table', color: 'blue', dailyPoints: 0, students: [] }
@@ -662,7 +641,6 @@
     let appData = null;
     let draggedSeatInfo = null;
     let pendingConfirmAction = null;
-    let selectedDate = new Date().toISOString().split('T')[0];
 
     /* ENHANCED CLASS TIMER ENGINE */
     let timerInterval = null;
@@ -805,4 +783,1169 @@
       const badge = document.getElementById('timerStatusBadge');
       if (badge) {
         badge.textContent = 'READY';
-        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5
+        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+      }
+    }
+
+    /* WEB AUDIO SYNTHESIZER */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'ding') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'dong') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'fanfare') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.frequency.value = freq;
+          gain2.gain.setValueAtTime(0.15, now + idx * 0.1);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+          osc2.start(now + idx * 0.1);
+          osc2.stop(now + idx * 0.1 + 0.4);
+        });
+      }
+    }
+
+    /* DATA LOADING & VALIDATION */
+    function loadAndMigrateData() {
+      const primaryData = localStorage.getItem(PRIMARY_STORAGE_KEY);
+      if (primaryData) {
+        try {
+          appData = JSON.parse(primaryData);
+        } catch (e) {
+          console.error("Error reading storage", e);
+        }
+      }
+
+      if (!appData) {
+        appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+      }
+
+      validateAndSanitizeState();
+      saveData(false);
+    }
+
+    function validateAndSanitizeState() {
+      if (!appData || typeof appData !== 'object') {
+        appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+        return;
+      }
+
+      if (!appData.classes || Object.keys(appData.classes).length === 0) {
+        appData.classes = JSON.parse(JSON.stringify(DEFAULT_APP_STATE.classes));
+      }
+
+      if (!appData.activeClassId || !appData.classes[appData.activeClassId]) {
+        appData.activeClassId = Object.keys(appData.classes)[0];
+      }
+
+      if (appData.showInactiveStudents === undefined) appData.showInactiveStudents = false;
+      if (appData.googleWebAppUrl === undefined) appData.googleWebAppUrl = '';
+      if (appData.autoSync === undefined) appData.autoSync = false;
+
+      const today = new Date().toISOString().split('T')[0];
+
+      Object.values(appData.classes).forEach(cls => {
+        if (cls.teks === undefined) cls.teks = '';
+        if (cls.iCan === undefined) cls.iCan = '';
+        if (cls.vocab === undefined) cls.vocab = '';
+        if (cls.materials === undefined) cls.materials = '';
+        if (cls.notes === undefined) cls.notes = '';
+        if (!cls.tables || !Array.isArray(cls.tables)) cls.tables = [];
+
+        if (!cls.rubricScore || cls.rubricScore.date !== today) {
+          cls.rubricScore = { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today };
+        }
+
+        cls.tables.forEach(table => {
+          if (table.dailyPoints === undefined) table.dailyPoints = 0;
+          if (!table.students || !Array.isArray(table.students)) table.students = [];
+
+          table.students.forEach((student, index) => {
+            if (student.present === undefined) student.present = true;
+            if (student.status === undefined) student.status = 'active';
+            if (!student.seat) student.seat = (index % 5) + 1;
+            if (student.points === undefined) student.points = 0;
+            if (student.comment === undefined) student.comment = '';
+          });
+        });
+      });
+    }
+
+    function saveData(triggerAutoSync = true) {
+      try {
+        localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(appData));
+        if (triggerAutoSync && appData.autoSync && appData.googleWebAppUrl) {
+          syncWithGoogleSheets(true);
+        }
+      } catch (e) {
+        console.error("Failed to save state:", e);
+      }
+    }
+
+    function getActiveClass() {
+      return appData.classes[appData.activeClassId];
+    }
+
+    function saveCurriculumDetails() {
+      const currentClass = getActiveClass();
+      if (!currentClass) return;
+
+      const teks = document.getElementById('classTeksInput');
+      const iCan = document.getElementById('classICanInput');
+      const vocab = document.getElementById('classVocabInput');
+      const materials = document.getElementById('classMaterialsInput');
+      const notes = document.getElementById('classNotesInput');
+
+      if (teks) currentClass.teks = teks.value;
+      if (iCan) currentClass.iCan = iCan.value;
+      if (vocab) currentClass.vocab = vocab.value;
+      if (materials) currentClass.materials = materials.value;
+      if (notes) currentClass.notes = notes.value;
+
+      saveData();
+    }
+
+    /* GOOGLE SHEETS API SYNC */
+    async function syncWithGoogleSheets(isBackground = false) {
+      const url = appData.googleWebAppUrl;
+      const syncBtnText = document.getElementById('syncButtonText');
+
+      if (!url) {
+        if (!isBackground) openSettingsModal();
+        return;
+      }
+
+      if (!isBackground && syncBtnText) syncBtnText.textContent = "Syncing...";
+
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(appData)
+        });
+
+        if (!isBackground) {
+          if (syncBtnText) syncBtnText.textContent = "Synced!";
+          setTimeout(() => { if (syncBtnText) syncBtnText.textContent = "Sheets Sync"; }, 2000);
+          playSound('ding');
+        }
+      } catch (err) {
+        console.error("Google Sheets Sync failed:", err);
+        if (!isBackground) {
+          if (syncBtnText) syncBtnText.textContent = "Sync Failed";
+          setTimeout(() => { if (syncBtnText) syncBtnText.textContent = "Sheets Sync"; }, 2000);
+        }
+      }
+    }
+
+    function saveGoogleSheetsSettings() {
+      const urlInput = document.getElementById('googleWebAppUrlInput').value.trim();
+      const autoSyncCheck = document.getElementById('autoSyncCheckbox').checked;
+
+      appData.googleWebAppUrl = urlInput;
+      appData.autoSync = autoSyncCheck;
+
+      saveData(false);
+      if (urlInput) syncWithGoogleSheets();
+    }
+
+    /* RENDERERS */
+    function renderApp() {
+      renderClassSelect();
+      renderDateBadge();
+      renderClassRubric();
+      renderCurriculumDetails();
+      renderTablesGrid();
+      updateInactiveToggleButton();
+      updateTimerDisplay();
+    }
+
+    function updateInactiveToggleButton() {
+      const btnLabel = document.getElementById('toggleInactiveLabel');
+      if (btnLabel) {
+        btnLabel.textContent = appData.showInactiveStudents ? "Hide Inactive Students" : "Show Inactive Students";
+      }
+    }
+
+    function toggleShowInactive() {
+      appData.showInactiveStudents = !appData.showInactiveStudents;
+      saveData(false);
+      updateInactiveToggleButton();
+      renderTablesGrid();
+    }
+
+    function renderDateBadge() {
+      const today = new Date();
+      document.getElementById('currentDateBadge').textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function renderClassSelect() {
+      const select = document.getElementById('classSelect');
+      select.innerHTML = '';
+
+      Object.values(appData.classes).forEach(cls => {
+        const option = document.createElement('option');
+        option.value = cls.id;
+        option.textContent = cls.name;
+        if (cls.id === appData.activeClassId) option.selected = true;
+        select.appendChild(option);
+      });
+    }
+
+    function switchClass(classId) {
+      if (appData.classes[classId]) {
+        appData.activeClassId = classId;
+        saveData();
+        renderApp();
+      }
+    }
+
+    function renderCurriculumDetails() {
+      const currentClass = getActiveClass();
+      if (!currentClass) return;
+
+      const teks = document.getElementById('classTeksInput');
+      const iCan = document.getElementById('classICanInput');
+      const vocab = document.getElementById('classVocabInput');
+      const materials = document.getElementById('classMaterialsInput');
+      const notes = document.getElementById('classNotesInput');
+
+      if (teks) teks.value = currentClass.teks || '';
+      if (iCan) iCan.value = currentClass.iCan || '';
+      if (vocab) vocab.value = currentClass.vocab || '';
+      if (materials) materials.value = currentClass.materials || '';
+      if (notes) notes.value = currentClass.notes || '';
+    }
+
+    /* ROUTINE RUBRIC ENGINE */
+    const RUBRIC_STEPS = [
+      { key: 'warmup', label: '1. Enter / Warm Up', icon: 'fa-door-open' },
+      { key: 'instruction', label: '2. Instruction', icon: 'fa-chalkboard' },
+      { key: 'studio', label: '3. Studio Time', icon: 'fa-paintbrush' },
+      { key: 'cleanup', label: '4. Clean Up', icon: 'fa-soap' },
+      { key: 'lineup', label: '5. Line Up', icon: 'fa-user-group' }
+    ];
+
+    function renderClassRubric() {
+      const currentClass = getActiveClass();
+      const rubric = currentClass.rubricScore;
+      const container = document.getElementById('rubricButtonsContainer');
+      container.innerHTML = '';
+
+      let earned = 0;
+
+      RUBRIC_STEPS.forEach(step => {
+        const isChecked = rubric[step.key] === true;
+        if (isChecked) earned++;
+
+        const btn = document.createElement('button');
+        btn.onclick = () => toggleRubricStep(step.key);
+        btn.className = `p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-md ${
+          isChecked ? 'bg-amber-400/10 border-amber-400/50 text-amber-300' : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between">
+            <i class="fa-solid ${step.icon} ${isChecked ? 'text-amber-400' : 'text-slate-500'}"></i>
+            <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-extrabold ${isChecked ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-500'}">
+              ${isChecked ? '✓' : '+1'}
+            </span>
+          </div>
+          <span class="text-xs font-bold leading-tight">${step.label}</span>
+        `;
+
+        container.appendChild(btn);
+      });
+
+      document.getElementById('classScoreBadge').textContent = `${earned} / 5 Points`;
+      document.getElementById('classProgressBar').style.width = `${(earned / 5) * 100}%`;
+    }
+
+    function toggleRubricStep(key) {
+      const currentClass = getActiveClass();
+      const currentVal = currentClass.rubricScore[key];
+      currentClass.rubricScore[key] = !currentVal;
+
+      if (!currentVal) playSound('ding');
+      else playSound('dong');
+
+      saveData();
+      renderClassRubric();
+    }
+
+    /* TABLES & SEATING GRID */
+    const COLOR_CLASSES = {
+      red: { border: 'border-red-500/40', bg: 'bg-red-500/10' },
+      orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10' },
+      yellow: { border: 'border-amber-500/40', bg: 'bg-amber-500/10' },
+      green: { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10' },
+      blue: { border: 'border-blue-500/40', bg: 'bg-blue-500/10' },
+      purple: { border: 'border-purple-500/40', bg: 'bg-purple-500/10' }
+    };
+
+    function renderTablesGrid() {
+      const grid = document.getElementById('tablesGrid');
+      grid.innerHTML = '';
+      const currentClass = getActiveClass();
+
+      if (!currentClass.tables || currentClass.tables.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-slate-900 border border-dashed border-slate-800 rounded-3xl p-12 text-center text-slate-500 space-y-3">
+            <i class="fa-solid fa-chair text-3xl"></i>
+            <p class="text-sm font-medium">No studio tables created yet for this class.</p>
+            <button onclick="openAddTableModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-500">
+              + Add First Table
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      currentClass.tables.forEach(table => {
+        const colorStyle = COLOR_CLASSES[table.color] || COLOR_CLASSES.blue;
+        const tableCard = document.createElement('div');
+        tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all resizable-box`;
+
+        let seatsHtml = '';
+        const visibleStudents = table.students.filter(s => appData.showInactiveStudents || s.status !== 'inactive');
+
+        for (let seatNum = 1; seatNum <= 5; seatNum++) {
+          const student = visibleStudents.find(s => parseInt(s.seat, 10) === seatNum);
+
+          if (student) {
+            const isAbsent = student.present === false;
+            const isInactive = student.status === 'inactive';
+            const hasComment = student.comment && student.comment.trim().length > 0;
+
+            seatsHtml += `
+              <div 
+                draggable="true" 
+                ondragstart="handleSeatDragStart(event, '${table.id}', ${seatNum}, '${student.id}')"
+                ondragend="handleSeatDragEnd(event)"
+                ondragover="handleSeatDragOver(event)"
+                ondragleave="handleSeatDragLeave(event)"
+                ondrop="handleSeatDrop(event, '${table.id}', ${seatNum})"
+                class="flex items-center justify-between gap-2 p-2 rounded-2xl transition border cursor-grab active:cursor-grabbing ${isInactive ? 'bg-slate-950/20 border-amber-500/30 opacity-60' : (isAbsent ? 'bg-slate-950/40 border-slate-800/50 opacity-50' : 'bg-slate-950 border-slate-800 hover:border-indigo-500/50')}"
+              >
+                <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
+                  <span class="text-slate-600 hover:text-slate-400 text-xs px-0.5 shrink-0"><i class="fa-solid fa-grip-vertical"></i></span>
+
+                  <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
+                    Seat ${seatNum}
+                  </span>
+
+                  ${isInactive ? `
+                    <button onclick="toggleStudentStatus('${table.id}', '${student.id}')" title="Student is Inactive/Hidden. Click to activate." class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
+                      INACTIVE
+                    </button>
+                  ` : `
+                    <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+                      ${isAbsent ? 'ABSENT' : 'PRESENT'}
+                    </button>
+                  `}
+
+                  <span class="font-bold text-xs leading-snug break-words flex-1 ${isAbsent || isInactive ? 'line-through text-slate-500' : 'text-slate-100'}">
+                    ${escapeHtml(student.name)}
+                  </span>
+
+                  ${hasComment ? `<span class="text-amber-400 text-xs shrink-0 cursor-pointer" title="Note: ${escapeHtml(student.comment)}"><i class="fa-solid fa-comment"></i></span>` : ''}
+                </div>
+
+                <div class="flex items-center gap-1 shrink-0">
+                  <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
+                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${student.points || 0}</span>
+                  <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center hover:bg-indigo-500 disabled:opacity-30">+</button>
+                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1" title="Edit / Hide / Delete Student"><i class="fa-solid fa-pen"></i></button>
+                </div>
+              </div>
+            `;
+          } else {
+            seatsHtml += `
+              <div 
+                ondragover="handleSeatDragOver(event)"
+                ondragleave="handleSeatDragLeave(event)"
+                ondrop="handleSeatDrop(event, '${table.id}', ${seatNum})"
+                class="p-2 rounded-2xl border border-dashed border-slate-800/80 bg-slate-950/30 text-slate-600 flex items-center justify-between text-xs transition hover:border-slate-700"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-900 text-slate-600 border border-slate-800 shrink-0">Seat ${seatNum}</span>
+                  <span class="italic text-[11px] text-slate-600">Empty Seat</span>
+                </div>
+                <button onclick="openAddStudentModal('${table.id}', ${seatNum})" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 transition">
+                  + Seat
+                </button>
+              </div>
+            `;
+          }
+        }
+
+        tableCard.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full ${colorStyle.bg} border ${colorStyle.border}"></span>
+                <h3 class="font-black text-base text-white tracking-tight">${escapeHtml(table.name)}</h3>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs" title="Edit Table"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="triggerDeleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs" title="Delete Table"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 rounded-2xl p-2.5">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
+                <span class="text-xs font-bold text-slate-200">Group Points</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="addTablePoints('${table.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center hover:bg-slate-700">-</button>
+                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">${table.dailyPoints || 0} pts</span>
+                <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300">+1 Table</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 flex-1">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
+              <span>Seating Chart (${visibleStudents.length} Students)</span>
+              <button onclick="distributeTablePointsToPresent('${table.id}')" class="text-amber-400 hover:text-amber-300 font-bold normal-case flex items-center gap-1 text-[11px] bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded-lg border border-amber-400/30 transition">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> +1 All Active
+              </button>
+            </div>
+            
+            <div class="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">${seatsHtml}</div>
+          </div>
+
+          <button onclick="openAddStudentModal('${table.id}')" class="w-full py-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-user-plus text-indigo-400"></i>
+            <span>Add Student to Table</span>
+          </button>
+        `;
+
+        grid.appendChild(tableCard);
+      });
+    }
+
+    /* DRAG AND DROP HANDLERS */
+    function handleSeatDragStart(e, sourceTableId, sourceSeat, studentId) {
+      draggedSeatInfo = { sourceTableId, sourceSeat, studentId };
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', JSON.stringify(draggedSeatInfo));
+    }
+
+    function handleSeatDragEnd(e) {
+      e.target.classList.remove('dragging');
+      draggedSeatInfo = null;
+      document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+    }
+
+    function handleSeatDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drop-target');
+    }
+
+    function handleSeatDragLeave(e) {
+      e.currentTarget.classList.remove('drop-target');
+    }
+
+    function handleSeatDrop(e, targetTableId, targetSeat) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drop-target');
+
+      if (!draggedSeatInfo) return;
+      const { sourceTableId, sourceSeat, studentId } = draggedSeatInfo;
+
+      if (sourceTableId === targetTableId && sourceSeat === targetSeat) return;
+
+      const currentClass = getActiveClass();
+      const sourceTable = currentClass.tables.find(t => t.id === sourceTableId);
+      const targetTable = currentClass.tables.find(t => t.id === targetTableId);
+
+      if (!sourceTable || !targetTable) return;
+
+      const student = sourceTable.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      const existingOccupant = targetTable.students.find(s => parseInt(s.seat, 10) === targetSeat);
+
+      if (existingOccupant) {
+        existingOccupant.seat = sourceSeat;
+        student.seat = targetSeat;
+
+        if (sourceTableId !== targetTableId) {
+          sourceTable.students = sourceTable.students.filter(s => s.id !== student.id);
+          targetTable.students = targetTable.students.filter(s => s.id !== existingOccupant.id);
+          
+          targetTable.students.push(student);
+          sourceTable.students.push(existingOccupant);
+        }
+      } else {
+        student.seat = targetSeat;
+        if (sourceTableId !== targetTableId) {
+          sourceTable.students = sourceTable.students.filter(s => s.id !== student.id);
+          targetTable.students.push(student);
+        }
+      }
+
+      playSound('ding');
+      saveData();
+      renderTablesGrid();
+    }
+
+    /* BULK ROSTER IMPORT */
+    function openBulkImportModal() {
+      const select = document.getElementById('bulkImportTableSelect');
+      select.innerHTML = '';
+
+      const currentClass = getActiveClass();
+
+      const autoOption = document.createElement('option');
+      autoOption.value = 'AUTO_DISTRIBUTE';
+      autoOption.textContent = '✨ Distribute evenly across tables';
+      select.appendChild(autoOption);
+
+      currentClass.tables.forEach(table => {
+        const option = document.createElement('option');
+        option.value = table.id;
+        option.textContent = `Assign to: ${table.name}`;
+        select.appendChild(option);
+      });
+
+      document.getElementById('bulkImportTextarea').value = '';
+      document.getElementById('bulkImportModal').classList.remove('hidden');
+    }
+
+    function closeBulkImportModal() {
+      document.getElementById('bulkImportModal').classList.add('hidden');
+    }
+
+    function executeBulkImport() {
+      const text = document.getElementById('bulkImportTextarea').value;
+      const targetTableId = document.getElementById('bulkImportTableSelect').value;
+
+      if (!text || text.trim() === '') return;
+
+      const rawNames = text.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length > 0);
+      if (rawNames.length === 0) return;
+
+      const currentClass = getActiveClass();
+
+      if (currentClass.tables.length === 0) {
+        currentClass.tables.push({
+          id: 'table_' + Date.now(),
+          name: 'Main Table',
+          color: 'blue',
+          dailyPoints: 0,
+          students: []
+        });
+      }
+
+      if (targetTableId === 'AUTO_DISTRIBUTE') {
+        rawNames.forEach((name, idx) => {
+          const table = currentClass.tables[idx % currentClass.tables.length];
+          const availableSeat = getFirstAvailableSeat(table);
+          table.students.push({
+            id: 'student_' + Date.now() + '_' + idx,
+            name: name,
+            seat: availableSeat,
+            points: 0,
+            present: true,
+            status: 'active',
+            comment: ''
+          });
+        });
+      } else {
+        const table = currentClass.tables.find(t => t.id === targetTableId);
+        if (table) {
+          rawNames.forEach((name, idx) => {
+            const availableSeat = getFirstAvailableSeat(table);
+            table.students.push({
+              id: 'student_' + Date.now() + '_' + idx,
+              name: name,
+              seat: availableSeat,
+              points: 0,
+              present: true,
+              status: 'active',
+              comment: ''
+            });
+          });
+        }
+      }
+
+      saveData();
+      renderTablesGrid();
+      closeBulkImportModal();
+      playSound('fanfare');
+    }
+
+    function getFirstAvailableSeat(table) {
+      const occupiedSeats = table.students.filter(s => s.status !== 'inactive').map(s => parseInt(s.seat, 10));
+      for (let s = 1; s <= 5; s++) {
+        if (!occupiedSeats.includes(s)) return s;
+      }
+      return table.students.length + 1;
+    }
+
+    /* STUDENT & ATTENDANCE ACTIONS */
+    function toggleAttendance(tableId, studentId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (student) {
+        student.present = student.present === false ? true : false;
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
+    function toggleStudentStatus(tableId, studentId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (student) {
+        student.status = student.status === 'inactive' ? 'active' : 'inactive';
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
+    function addStudentPoint(tableId, studentId, delta) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (student && student.present !== false && student.status !== 'inactive') {
+        student.points = Math.max(0, (student.points || 0) + delta);
+        if (delta > 0) playSound('ding');
+        else playSound('dong');
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
+    function addTablePoints(tableId, delta) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (table) {
+        table.dailyPoints = Math.max(0, (table.dailyPoints || 0) + delta);
+        if (delta > 0) playSound('ding');
+        else playSound('dong');
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
+    function distributeTablePointsToPresent(tableId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      let awarded = false;
+      table.students.forEach(student => {
+        if (student.present !== false && student.status !== 'inactive') {
+          student.points = (student.points || 0) + 1;
+          awarded = true;
+        }
+      });
+
+      if (awarded) {
+        playSound('fanfare');
+        saveData();
+        renderTablesGrid();
+      }
+    }
+
+    function resetDailyTablePoints() {
+      openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
+        const currentClass = getActiveClass();
+        currentClass.tables.forEach(t => t.dailyPoints = 0);
+        saveData();
+        renderTablesGrid();
+      });
+    }
+
+    /* CUSTOM CONFIRMATION MODAL ENGINE */
+    function openCustomConfirm(title, message, onConfirm) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+      pendingConfirmAction = onConfirm;
+      
+      const btn = document.getElementById('confirmModalActionBtn');
+      btn.onclick = function() {
+        if (pendingConfirmAction) pendingConfirmAction();
+        closeConfirmModal();
+      };
+
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      pendingConfirmAction = null;
+    }
+
+    /* STUDENT MODAL & DELETION */
+    function openAddStudentModal(tableId, preferredSeat = null) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      const targetSeat = preferredSeat || (table ? getFirstAvailableSeat(table) : 1);
+
+      document.getElementById('studentModalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-indigo-400"></i> Add Student';
+      document.getElementById('studentModalTableId').value = tableId;
+      document.getElementById('studentModalStudentId').value = '';
+      document.getElementById('studentModalNameInput').value = '';
+      document.getElementById('studentModalStatusSelect').value = 'active';
+      document.getElementById('studentModalSeatSelect').value = targetSeat > 5 ? '5' : targetSeat;
+      document.getElementById('studentModalCommentInput').value = '';
+      document.getElementById('studentModalDeleteBtn').classList.add('hidden');
+      document.getElementById('studentModal').classList.remove('hidden');
+    }
+
+    function openEditStudentModal(tableId, studentId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      document.getElementById('studentModalTitle').innerHTML = '<i class="fa-solid fa-pen text-amber-400"></i> Edit Student';
+      document.getElementById('studentModalTableId').value = tableId;
+      document.getElementById('studentModalStudentId').value = studentId;
+      document.getElementById('studentModalNameInput').value = student.name;
+      document.getElementById('studentModalStatusSelect').value = student.status || 'active';
+      document.getElementById('studentModalSeatSelect').value = student.seat || 1;
+      document.getElementById('studentModalCommentInput').value = student.comment || '';
+      document.getElementById('studentModalDeleteBtn').classList.remove('hidden');
+      document.getElementById('studentModal').classList.remove('hidden');
+    }
+
+    function closeStudentModal() {
+      document.getElementById('studentModal').classList.add('hidden');
+    }
+
+    function saveStudentFromModal() {
+      const tableId = document.getElementById('studentModalTableId').value;
+      const studentId = document.getElementById('studentModalStudentId').value;
+      const nameInput = document.getElementById('studentModalNameInput').value.trim();
+      const statusVal = document.getElementById('studentModalStatusSelect').value;
+      const seatVal = parseInt(document.getElementById('studentModalSeatSelect').value, 10);
+      const commentInput = document.getElementById('studentModalCommentInput').value.trim();
+
+      if (!nameInput) return;
+
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      if (studentId) {
+        const student = table.students.find(s => s.id === studentId);
+        if (student) {
+          student.name = nameInput;
+          student.status = statusVal;
+          student.seat = seatVal;
+          student.comment = commentInput;
+        }
+      } else {
+        table.students.push({
+          id: 'student_' + Date.now(),
+          name: nameInput,
+          seat: seatVal,
+          status: statusVal,
+          points: 0,
+          present: true,
+          comment: commentInput
+        });
+      }
+
+      saveData();
+      renderTablesGrid();
+      closeStudentModal();
+    }
+
+    function confirmDeleteStudentFromModal() {
+      const tableId = document.getElementById('studentModalTableId').value;
+      const studentId = document.getElementById('studentModalStudentId').value;
+      if (!tableId || !studentId) return;
+
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      const student = table.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      closeStudentModal();
+      openCustomConfirm(`Delete ${student.name}?`, "This will permanently remove the student and their points.", () => {
+        table.students = table.students.filter(s => s.id !== studentId);
+        saveData();
+        renderTablesGrid();
+      });
+    }
+
+    /* TABLE MODAL & DELETION */
+    function openAddTableModal() {
+      document.getElementById('tableModalTitle').innerHTML = '<i class="fa-solid fa-plus text-emerald-400"></i> Add Studio Table';
+      document.getElementById('tableModalTableId').value = '';
+      document.getElementById('tableModalNameInput').value = '';
+      document.getElementById('tableModalColorSelect').value = 'red';
+      document.getElementById('tableModalDeleteBtn').classList.add('hidden');
+      document.getElementById('tableModal').classList.remove('hidden');
+    }
+
+    function openEditTableModal(tableId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      document.getElementById('tableModalTitle').innerHTML = '<i class="fa-solid fa-pen text-amber-400"></i> Edit Studio Table';
+      document.getElementById('tableModalTableId').value = tableId;
+      document.getElementById('tableModalNameInput').value = table.name;
+      document.getElementById('tableModalColorSelect').value = table.color || 'blue';
+      document.getElementById('tableModalDeleteBtn').classList.remove('hidden');
+      document.getElementById('tableModal').classList.remove('hidden');
+    }
+
+    function closeTableModal() {
+      document.getElementById('tableModal').classList.add('hidden');
+    }
+
+    function saveTableFromModal() {
+      const tableId = document.getElementById('tableModalTableId').value;
+      const nameInput = document.getElementById('tableModalNameInput').value.trim();
+      const colorVal = document.getElementById('tableModalColorSelect').value;
+
+      if (!nameInput) return;
+
+      const currentClass = getActiveClass();
+
+      if (tableId) {
+        const table = currentClass.tables.find(t => t.id === tableId);
+        if (table) {
+          table.name = nameInput;
+          table.color = colorVal;
+        }
+      } else {
+        currentClass.tables.push({
+          id: 'table_' + Date.now(),
+          name: nameInput,
+          color: colorVal,
+          dailyPoints: 0,
+          students: []
+        });
+      }
+
+      saveData();
+      renderTablesGrid();
+      closeTableModal();
+    }
+
+    function triggerDeleteTable(tableId) {
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (!table) return;
+
+      openCustomConfirm(`Delete ${table.name}?`, "All students assigned to this table will also be deleted.", () => {
+        currentClass.tables = currentClass.tables.filter(t => t.id !== tableId);
+        saveData();
+        renderTablesGrid();
+      });
+    }
+
+    function confirmDeleteTableFromModal() {
+      const tableId = document.getElementById('tableModalTableId').value;
+      closeTableModal();
+      if (tableId) triggerDeleteTable(tableId);
+    }
+
+    /* CLASS MODAL & DELETION */
+    function openClassModal() {
+      renderClassListInModal();
+      document.getElementById('classModal').classList.remove('hidden');
+    }
+
+    function closeClassModal() {
+      document.getElementById('classModal').classList.add('hidden');
+    }
+
+    function renderClassListInModal() {
+      const container = document.getElementById('classListContainer');
+      container.innerHTML = '';
+
+      Object.values(appData.classes).forEach(cls => {
+        const isSelected = cls.id === appData.activeClassId;
+
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl';
+
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm ${isSelected ? 'text-amber-400' : 'text-slate-200'}">
+              ${escapeHtml(cls.name)}
+            </span>
+            ${isSelected ? '<span class="text-[10px] bg-amber-400/10 text-amber-300 font-extrabold px-2 py-0.5 rounded-full border border-amber-400/20">Active</span>' : ''}
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs" title="Rename Class"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="triggerDeleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs" title="Delete Class"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+
+        container.appendChild(item);
+      });
+    }
+
+    function createNewClass() {
+      const nameInput = document.getElementById('newClassNameInput');
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      const id = 'class_' + Date.now();
+      appData.classes[id] = {
+        id: id,
+        name: name,
+        teks: '',
+        iCan: '',
+        vocab: '',
+        materials: '',
+        notes: '',
+        rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
+        tables: []
+      };
+
+      appData.activeClassId = id;
+      nameInput.value = '';
+      saveData();
+      renderApp();
+      renderClassListInModal();
+    }
+
+    function editClassName(classId) {
+      const cls = appData.classes[classId];
+      if (!cls) return;
+
+      const newName = prompt("Edit class name:", cls.name);
+      if (newName && newName.trim() !== '') {
+        cls.name = newName.trim();
+        saveData();
+        renderApp();
+        renderClassListInModal();
+      }
+    }
+
+    function triggerDeleteClass(classId) {
+      if (Object.keys(appData.classes).length <= 1) {
+        alert("You must keep at least one active class.");
+        return;
+      }
+
+      const cls = appData.classes[classId];
+      if (!cls) return;
+
+      closeClassModal();
+      openCustomConfirm(`Delete "${cls.name}"?`, "This will permanently remove the entire class roster and settings.", () => {
+        delete appData.classes[classId];
+        if (appData.activeClassId === classId) {
+          appData.activeClassId = Object.keys(appData.classes)[0];
+        }
+        saveData();
+        renderApp();
+      });
+    }
+
+    /* ARTIST OF THE DAY RANDOM PICKER */
+    function openArtistModal() {
+      document.getElementById('artistWinnerDisplay').textContent = "Ready to Spin!";
+      document.getElementById('artistWinnerSub').textContent = "Absent & inactive students are excluded";
+      document.getElementById('artistModal').classList.remove('hidden');
+    }
+
+    function closeArtistModal() {
+      document.getElementById('artistModal').classList.add('hidden');
+    }
+
+    let isSpinning = false;
+
+    function spinArtistOfTheDay() {
+      if (isSpinning) return;
+
+      const currentClass = getActiveClass();
+      const presentStudents = [];
+
+      currentClass.tables.forEach(table => {
+        table.students.forEach(student => {
+          if (student.present !== false && student.status !== 'inactive') {
+            presentStudents.push({ ...student, tableName: table.name });
+          }
+        });
+      });
+
+      const display = document.getElementById('artistWinnerDisplay');
+      const sub = document.getElementById('artistWinnerSub');
+
+      if (presentStudents.length === 0) {
+        display.textContent = "No Active Students!";
+        sub.textContent = "Mark at least 1 student as active & present.";
+        playSound('dong');
+        return;
+      }
+
+      isSpinning = true;
+      let counter = 0;
+      const maxSpins = 20;
+
+      const interval = setInterval(() => {
+        const temp = presentStudents[Math.floor(Math.random() * presentStudents.length)];
+        display.textContent = temp.name;
+        sub.textContent = `${temp.tableName} • Seat ${temp.seat || 1}`;
+        playSound('ding');
+        counter++;
+
+        if (counter >= maxSpins) {
+          clearInterval(interval);
+          const winner = presentStudents[Math.floor(Math.random() * presentStudents.length)];
+          display.textContent = winner.name;
+          sub.textContent = `🎉 Winner! (${winner.tableName} • Seat ${winner.seat || 1})`;
+          playSound('fanfare');
+          triggerConfetti();
+          isSpinning = false;
+        }
+      }, 100);
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f59e0b', '#6366f1', '#10b981', '#ec4899', '#3b82f6'];
+
+      for (let i = 0; i < 70; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.7) * 14,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+          if (p.alpha > 0) {
+            active = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.3;
+            p.alpha -= 0.02;
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.restore();
+          }
+        });
+
+        if (active) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      animate();
+    }
+
+    /* SETTINGS & BACKUP */
+    function openSettingsModal() {
+      document.getElementById('googleWebAppUrlInput').value = appData.googleWebAppUrl || '';
+      document.getElementById('autoSyncCheckbox').checked = appData.autoSync || false;
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `ArtPoints_Roster_Backup_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataJSON(event) {
+      const fileReader = new FileReader();
+      fileReader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.classes) {
+            appData = imported;
+            validateAndSanitizeState();
+            saveData(true);
+            renderApp();
+            closeSettingsModal();
+          }
+        } catch (err) {
+          console.error("Error parsing JSON backup.");
+        }
+      };
+      if (event.target.files[0]) {
+        fileReader.readAsText(event.target.files[0]);
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    /* INIT */
+    window.onload = function() {
+      loadAndMigrateData();
+      renderApp();
+    };
+  </script>
+</body>
+</html>
