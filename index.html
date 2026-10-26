@@ -74,6 +74,16 @@
       overflow: auto;
       min-height: 160px;
     }
+
+    /* Remove spinner arrows from number inputs for clean timer look */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
@@ -153,19 +163,52 @@
           <span id="timerStatusBadge" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold">READY</span>
         </div>
 
-        <!-- Big Digital Timer Display -->
-        <div class="my-auto py-4">
-          <div id="timerDisplay" class="text-6xl sm:text-7xl lg:text-8xl font-black font-mono tracking-wider text-amber-400 drop-shadow-md">
-            10:00
-          </div>
+        <!-- Big Digital Timer Display with Interactive Type-in Inputs -->
+        <div class="my-auto py-2 flex items-center justify-center gap-1 font-mono text-amber-400">
+          <input 
+            type="number" 
+            id="timerMinInput" 
+            min="0" 
+            max="999" 
+            value="10" 
+            onchange="applyManualTimerInputs()" 
+            onfocus="this.select()"
+            class="w-24 sm:w-32 lg:w-40 bg-transparent text-center text-5xl sm:text-7xl lg:text-8xl font-black focus:outline-none focus:bg-slate-950/60 rounded-2xl border border-transparent focus:border-amber-400/50 transition drop-shadow-md" 
+            title="Click to type minutes"
+          />
+          <span class="text-5xl sm:text-7xl lg:text-8xl font-black pb-2 select-none">:</span>
+          <input 
+            type="number" 
+            id="timerSecInput" 
+            min="0" 
+            max="59" 
+            value="00" 
+            onchange="applyManualTimerInputs()" 
+            onfocus="this.select()"
+            class="w-24 sm:w-32 lg:w-40 bg-transparent text-center text-5xl sm:text-7xl lg:text-8xl font-black focus:outline-none focus:bg-slate-950/60 rounded-2xl border border-transparent focus:border-amber-400/50 transition drop-shadow-md" 
+            title="Click to type seconds"
+          />
         </div>
 
-        <!-- Quick Set Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-2 w-full">
-          <button onclick="setTimerMinutes(1)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">+1 Min</button>
-          <button onclick="setTimerMinutes(5)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">5 Min</button>
-          <button onclick="setTimerMinutes(10)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">10 Min</button>
-          <button onclick="setTimerMinutes(15)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">15 Min</button>
+        <!-- Quick Add / Subtract & Preset Time Controls -->
+        <div class="flex flex-col gap-2 w-full">
+          <!-- Adjust Time On The Fly (+ / -) -->
+          <div class="flex flex-wrap items-center justify-center gap-1.5">
+            <button onclick="adjustTimerSeconds(-300)" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition">-5m</button>
+            <button onclick="adjustTimerSeconds(-60)" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition">-1m</button>
+            <span class="text-[10px] uppercase font-bold text-slate-500 px-1">Adjust</span>
+            <button onclick="adjustTimerSeconds(60)" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-bold border border-emerald-500/30 transition">+1m</button>
+            <button onclick="adjustTimerSeconds(300)" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-bold border border-emerald-500/30 transition">+5m</button>
+          </div>
+
+          <!-- Presets -->
+          <div class="flex flex-wrap items-center justify-center gap-1.5">
+            <button onclick="setTimerMinutes(1)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">1m</button>
+            <button onclick="setTimerMinutes(5)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">5m</button>
+            <button onclick="setTimerMinutes(10)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">10m</button>
+            <button onclick="setTimerMinutes(15)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">15m</button>
+            <button onclick="setTimerMinutes(20)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">20m</button>
+          </div>
         </div>
 
         <!-- Timer Controls -->
@@ -599,7 +642,7 @@
     let draggedSeatInfo = null;
     let pendingConfirmAction = null;
 
-    /* CLASS TIMER ENGINE */
+    /* ENHANCED CLASS TIMER ENGINE */
     let timerInterval = null;
     let timerTotalSeconds = 600; // Default 10 min
     let timerRemainingSeconds = 600;
@@ -608,10 +651,52 @@
     function updateTimerDisplay() {
       const mins = Math.floor(timerRemainingSeconds / 60);
       const secs = timerRemainingSeconds % 60;
-      const display = document.getElementById('timerDisplay');
-      if (display) {
-        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      const minInput = document.getElementById('timerMinInput');
+      const secInput = document.getElementById('timerSecInput');
+      
+      if (minInput && document.activeElement !== minInput) {
+        minInput.value = mins.toString().padStart(2, '0');
       }
+      if (secInput && document.activeElement !== secInput) {
+        secInput.value = secs.toString().padStart(2, '0');
+      }
+    }
+
+    function applyManualTimerInputs() {
+      const minInput = document.getElementById('timerMinInput');
+      const secInput = document.getElementById('timerSecInput');
+      
+      let mins = parseInt(minInput.value, 10) || 0;
+      let secs = parseInt(secInput.value, 10) || 0;
+      
+      if (secs >= 60) {
+        mins += Math.floor(secs / 60);
+        secs = secs % 60;
+      }
+
+      mins = Math.max(0, mins);
+      secs = Math.max(0, secs);
+
+      timerTotalSeconds = (mins * 60) + secs;
+      timerRemainingSeconds = timerTotalSeconds;
+      
+      updateTimerDisplay();
+      
+      if (!isTimerRunning) {
+        const badge = document.getElementById('timerStatusBadge');
+        if (badge) {
+          badge.textContent = 'READY';
+          badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+        }
+      }
+    }
+
+    function adjustTimerSeconds(amount) {
+      timerRemainingSeconds = Math.max(0, timerRemainingSeconds + amount);
+      if (amount > 0) timerTotalSeconds += amount;
+      updateTimerDisplay();
+      playSound('ding');
     }
 
     function setTimerMinutes(mins) {
@@ -619,8 +704,11 @@
       timerTotalSeconds = mins * 60;
       timerRemainingSeconds = timerTotalSeconds;
       updateTimerDisplay();
-      document.getElementById('timerStatusBadge').textContent = 'READY';
-      document.getElementById('timerStatusBadge').className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+      const badge = document.getElementById('timerStatusBadge');
+      if (badge) {
+        badge.textContent = 'READY';
+        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+      }
     }
 
     function toggleTimer() {
