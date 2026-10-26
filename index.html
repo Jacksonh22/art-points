@@ -68,6 +68,12 @@
       outline-offset: -2px;
       background-color: rgba(99, 102, 241, 0.15) !important;
     }
+
+    .resizable-box {
+      resize: vertical;
+      overflow: auto;
+      min-height: 160px;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
@@ -86,7 +92,7 @@
           <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
             Art Points Studio <span class="bg-amber-400 text-slate-950 text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">Ed</span>
           </h1>
-          <p class="text-xs text-slate-400">Seating Chart & Class Manager</p>
+          <p class="text-xs text-slate-400">Seating Chart, Studio Dollars & Class Manager</p>
         </div>
       </div>
 
@@ -135,6 +141,94 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
+    <!-- 50/50 SPLIT LAUNCH PAD: TIMER & CURRICULUM STATEMENTS -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+      
+      <!-- LEFT HALF (1/2): CLASS TIMER -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between items-center text-center space-y-4">
+        <div class="w-full flex items-center justify-between border-b border-slate-800 pb-3">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-400 flex items-center gap-2">
+            <i class="fa-solid fa-stopwatch text-amber-400"></i> Studio Class Timer
+          </span>
+          <span id="timerStatusBadge" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold">READY</span>
+        </div>
+
+        <!-- Big Digital Timer Display -->
+        <div class="my-auto py-4">
+          <div id="timerDisplay" class="text-6xl sm:text-7xl lg:text-8xl font-black font-mono tracking-wider text-amber-400 drop-shadow-md">
+            10:00
+          </div>
+        </div>
+
+        <!-- Quick Set Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-2 w-full">
+          <button onclick="setTimerMinutes(1)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">+1 Min</button>
+          <button onclick="setTimerMinutes(5)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">5 Min</button>
+          <button onclick="setTimerMinutes(10)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">10 Min</button>
+          <button onclick="setTimerMinutes(15)" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition">15 Min</button>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex items-center gap-3 w-full pt-2 border-t border-slate-800">
+          <button id="startTimerBtn" onclick="toggleTimer()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-play"></i> Start Timer
+          </button>
+          <button onclick="resetTimer()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm rounded-2xl border border-slate-700 transition">
+            <i class="fa-solid fa-rotate-right"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT HALF (1/2): CURRICULUM STATEMENTS & NOTES -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 resizable-box flex flex-col justify-between">
+        
+        <!-- 1. TEXAS TEKS SECTION -->
+        <div class="space-y-1">
+          <label for="classTeksInput" class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-star"></i> Texas TEKS Standards
+          </label>
+          <textarea id="classTeksInput" oninput="saveCurriculumDetails()" rows="2" placeholder="Enter Texas TEKS standards for this unit..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-amber-400 placeholder:text-slate-600 transition resize-y"></textarea>
+        </div>
+
+        <!-- 2. I CAN STATEMENTS SECTION -->
+        <div class="space-y-1">
+          <label for="classICanInput" class="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-bullseye"></i> "I Can" Statements
+          </label>
+          <textarea id="classICanInput" oninput="saveCurriculumDetails()" rows="2" placeholder="e.g. I can identify warm and cool colors..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 transition resize-y"></textarea>
+        </div>
+
+        <!-- 3. VOCABULARY SECTION -->
+        <div class="space-y-1">
+          <label for="classVocabInput" class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-book-bookmark"></i> Key Vocabulary
+          </label>
+          <textarea id="classVocabInput" oninput="saveCurriculumDetails()" rows="2" placeholder="List vocabulary terms (e.g. Monochromatic, Balance)..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 transition resize-y"></textarea>
+        </div>
+
+        <!-- 4. MATERIALS & SUPPLIES SECTION -->
+        <div class="space-y-1">
+          <label for="classMaterialsInput" class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-boxes-packing"></i> Class Materials & Supplies
+          </label>
+          <textarea id="classMaterialsInput" oninput="saveCurriculumDetails()" rows="2" placeholder="List supplies needed for this lesson..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-cyan-400 placeholder:text-slate-600 transition resize-y"></textarea>
+        </div>
+
+        <!-- 5. CLASS NOTES & DAILY REMINDERS -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between">
+            <label for="classNotesInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-note-sticky text-amber-400"></i> Class Notes & Daily Reminders
+            </label>
+            <span class="text-[10px] text-slate-500">Auto-saves</span>
+          </div>
+          <textarea id="classNotesInput" oninput="saveCurriculumDetails()" rows="2" placeholder="Add class announcements or goals..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 transition resize-y"></textarea>
+        </div>
+
+      </div>
+
+    </section>
+
     <!-- ROUTINE RUBRIC TRACKER -->
     <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
@@ -155,16 +249,6 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="rubricButtonsContainer"></div>
-
-      <div class="pt-2 border-t border-slate-800/80">
-        <div class="flex items-center justify-between mb-2">
-          <label for="classNotesInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-            <i class="fa-solid fa-note-sticky text-amber-400"></i> Class Notes & Daily Reminders
-          </label>
-          <span class="text-[10px] text-slate-500">Auto-saves on edit</span>
-        </div>
-        <textarea id="classNotesInput" oninput="saveClassNotes()" rows="2" placeholder="Add class-wide announcements, project goals, or reminders for this section..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 transition resize-none"></textarea>
-      </div>
     </section>
 
     <!-- TABLES & SEATING GRID DISPLAY -->
@@ -172,25 +256,22 @@
       <div class="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-            <i class="fa-solid fa-border-all text-indigo-400"></i> Studio Tables & Seating
+            <i class="fa-solid fa-border-all text-indigo-400"></i> Studio Tables & Seating (Art Points)
           </h2>
           <p class="text-xs text-slate-400">Drag student seats directly between tables. Mark inactive students to hide them without losing points.</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <!-- Toggle Inactive Students Visibility -->
           <button onclick="toggleShowInactive()" id="toggleInactiveBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-eye-slash text-amber-400"></i>
             <span id="toggleInactiveLabel">Show Inactive Students</span>
           </button>
 
-          <!-- Add Table Button -->
           <button onclick="openAddTableModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i>
             <span>Add Table</span>
           </button>
           
-          <!-- Reset Daily Points Button -->
           <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
             <i class="fa-solid fa-rotate-left text-slate-400"></i>
             <span>Reset Daily Points</span>
@@ -198,7 +279,6 @@
         </div>
       </div>
 
-      <!-- Dynamic Table Grid -->
       <div id="tablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"></div>
     </section>
 
@@ -489,9 +569,7 @@
   </div>
 
   <script>
-    /* ==========================================================================
-       PRIMARY STATE & GLOBAL VARS
-       ========================================================================== */
+    /* PRIMARY STATE & GLOBAL VARS */
     const PRIMARY_STORAGE_KEY = 'ART_POINTS_STUDIO_ED_DATA';
 
     const DEFAULT_APP_STATE = {
@@ -503,6 +581,10 @@
         'class_default': {
           id: 'class_default',
           name: '1st Period Art',
+          teks: '',
+          iCan: '',
+          vocab: '',
+          materials: '',
           notes: '',
           rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
           tables: [
@@ -516,6 +598,106 @@
     let appData = null;
     let draggedSeatInfo = null;
     let pendingConfirmAction = null;
+
+    /* CLASS TIMER ENGINE */
+    let timerInterval = null;
+    let timerTotalSeconds = 600; // Default 10 min
+    let timerRemainingSeconds = 600;
+    let isTimerRunning = false;
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerRemainingSeconds / 60);
+      const secs = timerRemainingSeconds % 60;
+      const display = document.getElementById('timerDisplay');
+      if (display) {
+        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+    }
+
+    function setTimerMinutes(mins) {
+      if (isTimerRunning) pauseTimer();
+      timerTotalSeconds = mins * 60;
+      timerRemainingSeconds = timerTotalSeconds;
+      updateTimerDisplay();
+      document.getElementById('timerStatusBadge').textContent = 'READY';
+      document.getElementById('timerStatusBadge').className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      if (timerRemainingSeconds <= 0) return;
+      isTimerRunning = true;
+      const startBtn = document.getElementById('startTimerBtn');
+      if (startBtn) {
+        startBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Timer';
+        startBtn.className = 'flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
+      }
+
+      const badge = document.getElementById('timerStatusBadge');
+      if (badge) {
+        badge.textContent = 'RUNNING';
+        badge.className = 'text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold';
+      }
+
+      timerInterval = setInterval(() => {
+        timerRemainingSeconds--;
+        updateTimerDisplay();
+
+        if (timerRemainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          playSound('fanfare');
+          triggerConfetti();
+          if (badge) {
+            badge.textContent = 'TIME UP!';
+            badge.className = 'text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full font-bold';
+          }
+          if (startBtn) {
+            startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
+            startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
+          }
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      const startBtn = document.getElementById('startTimerBtn');
+      if (startBtn) {
+        startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Resume Timer';
+        startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
+      }
+      const badge = document.getElementById('timerStatusBadge');
+      if (badge) {
+        badge.textContent = 'PAUSED';
+        badge.className = 'text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold';
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerRemainingSeconds = timerTotalSeconds;
+      updateTimerDisplay();
+      const startBtn = document.getElementById('startTimerBtn');
+      if (startBtn) {
+        startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
+        startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
+      }
+      const badge = document.getElementById('timerStatusBadge');
+      if (badge) {
+        badge.textContent = 'READY';
+        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
+      }
+    }
 
     /* WEB AUDIO SYNTHESIZER */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -599,6 +781,10 @@
       const today = new Date().toISOString().split('T')[0];
 
       Object.values(appData.classes).forEach(cls => {
+        if (cls.teks === undefined) cls.teks = '';
+        if (cls.iCan === undefined) cls.iCan = '';
+        if (cls.vocab === undefined) cls.vocab = '';
+        if (cls.materials === undefined) cls.materials = '';
         if (cls.notes === undefined) cls.notes = '';
         if (!cls.tables || !Array.isArray(cls.tables)) cls.tables = [];
 
@@ -612,7 +798,7 @@
 
           table.students.forEach((student, index) => {
             if (student.present === undefined) student.present = true;
-            if (student.status === undefined) student.status = 'active'; // active or inactive
+            if (student.status === undefined) student.status = 'active';
             if (!student.seat) student.seat = (index % 5) + 1;
             if (student.points === undefined) student.points = 0;
             if (student.comment === undefined) student.comment = '';
@@ -636,13 +822,23 @@
       return appData.classes[appData.activeClassId];
     }
 
-    function saveClassNotes() {
+    function saveCurriculumDetails() {
       const currentClass = getActiveClass();
-      const input = document.getElementById('classNotesInput');
-      if (currentClass && input) {
-        currentClass.notes = input.value;
-        saveData();
-      }
+      if (!currentClass) return;
+
+      const teks = document.getElementById('classTeksInput');
+      const iCan = document.getElementById('classICanInput');
+      const vocab = document.getElementById('classVocabInput');
+      const materials = document.getElementById('classMaterialsInput');
+      const notes = document.getElementById('classNotesInput');
+
+      if (teks) currentClass.teks = teks.value;
+      if (iCan) currentClass.iCan = iCan.value;
+      if (vocab) currentClass.vocab = vocab.value;
+      if (materials) currentClass.materials = materials.value;
+      if (notes) currentClass.notes = notes.value;
+
+      saveData();
     }
 
     /* GOOGLE SHEETS API SYNC */
@@ -651,9 +847,7 @@
       const syncBtnText = document.getElementById('syncButtonText');
 
       if (!url) {
-        if (!isBackground) {
-          openSettingsModal();
-        }
+        if (!isBackground) openSettingsModal();
         return;
       }
 
@@ -697,9 +891,10 @@
       renderClassSelect();
       renderDateBadge();
       renderClassRubric();
-      renderClassNotes();
+      renderCurriculumDetails();
       renderTablesGrid();
       updateInactiveToggleButton();
+      updateTimerDisplay();
     }
 
     function updateInactiveToggleButton() {
@@ -742,12 +937,21 @@
       }
     }
 
-    function renderClassNotes() {
+    function renderCurriculumDetails() {
       const currentClass = getActiveClass();
-      const input = document.getElementById('classNotesInput');
-      if (currentClass && input) {
-        input.value = currentClass.notes || '';
-      }
+      if (!currentClass) return;
+
+      const teks = document.getElementById('classTeksInput');
+      const iCan = document.getElementById('classICanInput');
+      const vocab = document.getElementById('classVocabInput');
+      const materials = document.getElementById('classMaterialsInput');
+      const notes = document.getElementById('classNotesInput');
+
+      if (teks) teks.value = currentClass.teks || '';
+      if (iCan) iCan.value = currentClass.iCan || '';
+      if (vocab) vocab.value = currentClass.vocab || '';
+      if (materials) materials.value = currentClass.materials || '';
+      if (notes) notes.value = currentClass.notes || '';
     }
 
     /* ROUTINE RUBRIC ENGINE */
@@ -837,7 +1041,7 @@
       currentClass.tables.forEach(table => {
         const colorStyle = COLOR_CLASSES[table.color] || COLOR_CLASSES.blue;
         const tableCard = document.createElement('div');
-        tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all`;
+        tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all resizable-box`;
 
         let seatsHtml = '';
         const visibleStudents = table.students.filter(s => appData.showInactiveStudents || s.status !== 'inactive');
@@ -1445,6 +1649,10 @@
       appData.classes[id] = {
         id: id,
         name: name,
+        teks: '',
+        iCan: '',
+        vocab: '',
+        materials: '',
         notes: '',
         rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
         tables: []
