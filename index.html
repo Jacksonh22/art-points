@@ -85,7 +85,7 @@
       -moz-appearance: textfield;
     }
 
-    /* Custom dark styling for date input */
+    /* Dark styling for date input */
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1);
       cursor: pointer;
@@ -157,7 +157,7 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TOP DATE OPTION BAR ACROSS THE SITE (ADDED ABOVE TIMER) -->
+    <!-- TOP DATE OPTION BAR -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
         <i class="fa-solid fa-calendar-days text-amber-400 text-base"></i>
@@ -355,7 +355,7 @@
           
           <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
             <i class="fa-solid fa-rotate-left text-slate-400"></i>
-            <span>Reset Points</span>
+            <span>Reset Daily Points</span>
           </button>
         </div>
       </div>
@@ -915,7 +915,7 @@
         if (cls.notes === undefined) cls.notes = '';
         if (!cls.tables || !Array.isArray(cls.tables)) cls.tables = [];
 
-        if (!cls.rubricScore || typeof cls.rubricScore !== 'object') {
+        if (!cls.rubricScore || cls.rubricScore.date !== today) {
           cls.rubricScore = { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today };
         }
 
@@ -946,6 +946,7 @@
     }
 
     function getActiveClass() {
+      if (!appData || !appData.classes) return null;
       return appData.classes[appData.activeClassId];
     }
 
@@ -989,7 +990,7 @@
 
     /* GOOGLE SHEETS API SYNC */
     async function syncWithGoogleSheets(isBackground = false) {
-      const url = appData.googleWebAppUrl;
+      const url = appData ? appData.googleWebAppUrl : '';
       const syncBtnText = document.getElementById('syncButtonText');
 
       if (!url) {
@@ -1025,10 +1026,12 @@
       const urlInput = document.getElementById('googleWebAppUrlInput').value.trim();
       const autoSyncCheck = document.getElementById('autoSyncCheckbox').checked;
 
-      appData.googleWebAppUrl = urlInput;
-      appData.autoSync = autoSyncCheck;
+      if (appData) {
+        appData.googleWebAppUrl = urlInput;
+        appData.autoSync = autoSyncCheck;
+        saveData(false);
+      }
 
-      saveData(false);
       if (urlInput) syncWithGoogleSheets();
     }
 
@@ -1050,12 +1053,13 @@
 
     function updateInactiveToggleButton() {
       const btnLabel = document.getElementById('toggleInactiveLabel');
-      if (btnLabel) {
+      if (btnLabel && appData) {
         btnLabel.textContent = appData.showInactiveStudents ? "Hide Inactive Students" : "Show Inactive Students";
       }
     }
 
     function toggleShowInactive() {
+      if (!appData) return;
       appData.showInactiveStudents = !appData.showInactiveStudents;
       saveData(false);
       updateInactiveToggleButton();
@@ -1075,6 +1079,7 @@
 
     function renderClassSelect() {
       const select = document.getElementById('classSelect');
+      if (!select || !appData || !appData.classes) return;
       select.innerHTML = '';
 
       Object.values(appData.classes).forEach(cls => {
@@ -1087,7 +1092,7 @@
     }
 
     function switchClass(classId) {
-      if (appData.classes[classId]) {
+      if (appData && appData.classes[classId]) {
         appData.activeClassId = classId;
         saveData();
         renderApp();
@@ -1122,8 +1127,10 @@
 
     function renderClassRubric() {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const rubric = currentClass.rubricScore || {};
       const container = document.getElementById('rubricButtonsContainer');
+      if (!container) return;
       container.innerHTML = '';
 
       let earned = 0;
@@ -1151,12 +1158,15 @@
         container.appendChild(btn);
       });
 
-      document.getElementById('classScoreBadge').textContent = `${earned} / 5 Points`;
-      document.getElementById('classProgressBar').style.width = `${(earned / 5) * 100}%`;
+      const scoreBadge = document.getElementById('classScoreBadge');
+      const progressBar = document.getElementById('classProgressBar');
+      if (scoreBadge) scoreBadge.textContent = `${earned} / 5 Points`;
+      if (progressBar) progressBar.style.width = `${(earned / 5) * 100}%`;
     }
 
     function toggleRubricStep(key) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       if (!currentClass.rubricScore) currentClass.rubricScore = {};
       const currentVal = currentClass.rubricScore[key];
       currentClass.rubricScore[key] = !currentVal;
@@ -1180,8 +1190,10 @@
 
     function renderTablesGrid() {
       const grid = document.getElementById('tablesGrid');
+      if (!grid) return;
       grid.innerHTML = '';
       const currentClass = getActiveClass();
+      if (!currentClass) return;
 
       if (!currentClass.tables || currentClass.tables.length === 0) {
         grid.innerHTML = `
@@ -1355,6 +1367,7 @@
       if (sourceTableId === targetTableId && sourceSeat === targetSeat) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const sourceTable = currentClass.tables.find(t => t.id === sourceTableId);
       const targetTable = currentClass.tables.find(t => t.id === targetTableId);
 
@@ -1392,9 +1405,11 @@
     /* BULK ROSTER IMPORT */
     function openBulkImportModal() {
       const select = document.getElementById('bulkImportTableSelect');
+      if (!select) return;
       select.innerHTML = '';
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
 
       const autoOption = document.createElement('option');
       autoOption.value = 'AUTO_DISTRIBUTE';
@@ -1426,6 +1441,7 @@
       if (rawNames.length === 0) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
 
       if (currentClass.tables.length === 0) {
         currentClass.tables.push({
@@ -1476,6 +1492,7 @@
     }
 
     function getFirstAvailableSeat(table) {
+      if (!table || !table.students) return 1;
       const occupiedSeats = table.students.filter(s => s.status !== 'inactive').map(s => parseInt(s.seat, 10));
       for (let s = 1; s <= 5; s++) {
         if (!occupiedSeats.includes(s)) return s;
@@ -1486,6 +1503,7 @@
     /* STUDENT & ATTENDANCE ACTIONS */
     function toggleAttendance(tableId, studentId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1499,6 +1517,7 @@
 
     function toggleStudentStatus(tableId, studentId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1512,6 +1531,7 @@
 
     function addStudentPoint(tableId, studentId, delta) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1527,6 +1547,7 @@
 
     function addTablePoints(tableId, delta) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (table) {
         table.dailyPoints = Math.max(0, (table.dailyPoints || 0) + delta);
@@ -1539,6 +1560,7 @@
 
     function distributeTablePointsToPresent(tableId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1560,9 +1582,11 @@
     function resetDailyTablePoints() {
       openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
         const currentClass = getActiveClass();
-        currentClass.tables.forEach(t => t.dailyPoints = 0);
-        saveData();
-        renderTablesGrid();
+        if (currentClass) {
+          currentClass.tables.forEach(t => t.dailyPoints = 0);
+          saveData();
+          renderTablesGrid();
+        }
       });
     }
 
@@ -1589,7 +1613,7 @@
     /* STUDENT MODAL & DELETION */
     function openAddStudentModal(tableId, preferredSeat = null) {
       const currentClass = getActiveClass();
-      const table = currentClass.tables.find(t => t.id === tableId);
+      const table = currentClass ? currentClass.tables.find(t => t.id === tableId) : null;
       const targetSeat = preferredSeat || (table ? getFirstAvailableSeat(table) : 1);
 
       document.getElementById('studentModalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-indigo-400"></i> Add Student';
@@ -1605,6 +1629,7 @@
 
     function openEditStudentModal(tableId, studentId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1637,6 +1662,7 @@
       if (!nameInput) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1671,6 +1697,7 @@
       if (!tableId || !studentId) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1697,6 +1724,7 @@
 
     function openEditTableModal(tableId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1720,6 +1748,7 @@
       if (!nameInput) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
 
       if (tableId) {
         const table = currentClass.tables.find(t => t.id === tableId);
@@ -1744,6 +1773,7 @@
 
     function triggerDeleteTable(tableId) {
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
@@ -1772,6 +1802,7 @@
 
     function renderClassListInModal() {
       const container = document.getElementById('classListContainer');
+      if (!container || !appData || !appData.classes) return;
       container.innerHTML = '';
 
       Object.values(appData.classes).forEach(cls => {
@@ -1801,7 +1832,7 @@
     function createNewClass() {
       const nameInput = document.getElementById('newClassNameInput');
       const name = nameInput.value.trim();
-      if (!name) return;
+      if (!name || !appData) return;
 
       const id = 'class_' + Date.now();
       appData.classes[id] = {
@@ -1824,6 +1855,7 @@
     }
 
     function editClassName(classId) {
+      if (!appData || !appData.classes) return;
       const cls = appData.classes[classId];
       if (!cls) return;
 
@@ -1837,6 +1869,7 @@
     }
 
     function triggerDeleteClass(classId) {
+      if (!appData || !appData.classes) return;
       if (Object.keys(appData.classes).length <= 1) {
         alert("You must keep at least one active class.");
         return;
@@ -1873,6 +1906,7 @@
       if (isSpinning) return;
 
       const currentClass = getActiveClass();
+      if (!currentClass) return;
       const presentStudents = [];
 
       currentClass.tables.forEach(table => {
@@ -1966,8 +2000,8 @@
 
     /* SETTINGS & BACKUP */
     function openSettingsModal() {
-      document.getElementById('googleWebAppUrlInput').value = appData.googleWebAppUrl || '';
-      document.getElementById('autoSyncCheckbox').checked = appData.autoSync || false;
+      document.getElementById('googleWebAppUrlInput').value = appData ? appData.googleWebAppUrl || '' : '';
+      document.getElementById('autoSyncCheckbox').checked = appData ? appData.autoSync || false : false;
       document.getElementById('settingsModal').classList.remove('hidden');
     }
 
@@ -2013,9 +2047,8 @@
 
     /* INIT */
     window.onload = function() {
-      setPointsDateToToday();
       loadAndMigrateData();
-      renderApp();
+      setPointsDateToToday();
     };
   </script>
 </body>
