@@ -157,17 +157,17 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- DATE OPTION BAR GOING ACROSS THE SITE AT THE TOP OF THE TIMER -->
+    <!-- TOP DATE OPTION BAR ACROSS THE SITE (ADDED ABOVE TIMER) -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
         <i class="fa-solid fa-calendar-days text-amber-400 text-base"></i>
-        <span class="text-xs font-black uppercase tracking-wider text-slate-300">Active Tracking Date:</span>
+        <span class="text-xs font-black uppercase tracking-wider text-slate-300">Tracking Date:</span>
         <span id="topDateFormatted" class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20"></span>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
         <button onclick="shiftPointsDate(-1)" class="px-2.5 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition flex items-center gap-1">
-          <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev Day
+          <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
         </button>
 
         <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl">
@@ -180,7 +180,7 @@
         </div>
 
         <button onclick="shiftPointsDate(1)" class="px-2.5 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-slate-800 transition flex items-center gap-1">
-          Next Day <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
         </button>
 
         <button onclick="setPointsDateToToday()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-extrabold shadow transition">
@@ -355,7 +355,7 @@
           
           <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
             <i class="fa-solid fa-rotate-left text-slate-400"></i>
-            <span>Reset Selected Date Points</span>
+            <span>Reset Points</span>
           </button>
         </div>
       </div>
@@ -667,7 +667,7 @@
           vocab: '',
           materials: '',
           notes: '',
-          history: {}, // Holds date-specific scores, table points, and student points
+          rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
           tables: [
             { id: 't_red', name: 'Red Table', color: 'red', dailyPoints: 0, students: [] },
             { id: 't_blue', name: 'Blue Table', color: 'blue', dailyPoints: 0, students: [] }
@@ -905,46 +905,33 @@
       if (appData.googleWebAppUrl === undefined) appData.googleWebAppUrl = '';
       if (appData.autoSync === undefined) appData.autoSync = false;
 
+      const today = new Date().toISOString().split('T')[0];
+
       Object.values(appData.classes).forEach(cls => {
         if (cls.teks === undefined) cls.teks = '';
         if (cls.iCan === undefined) cls.iCan = '';
         if (cls.vocab === undefined) cls.vocab = '';
         if (cls.materials === undefined) cls.materials = '';
         if (cls.notes === undefined) cls.notes = '';
-        if (!cls.history || typeof cls.history !== 'object') cls.history = {};
         if (!cls.tables || !Array.isArray(cls.tables)) cls.tables = [];
 
+        if (!cls.rubricScore || typeof cls.rubricScore !== 'object') {
+          cls.rubricScore = { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: today };
+        }
+
         cls.tables.forEach(table => {
+          if (table.dailyPoints === undefined) table.dailyPoints = 0;
           if (!table.students || !Array.isArray(table.students)) table.students = [];
 
           table.students.forEach((student, index) => {
             if (student.present === undefined) student.present = true;
             if (student.status === undefined) student.status = 'active';
             if (!student.seat) student.seat = (index % 5) + 1;
+            if (student.points === undefined) student.points = 0;
             if (student.comment === undefined) student.comment = '';
           });
         });
       });
-
-      ensureHistoryDateRecord(selectedDate);
-    }
-
-    function ensureHistoryDateRecord(dateStr) {
-      const currentClass = getActiveClass();
-      if (!currentClass) return;
-
-      if (!currentClass.history[dateStr]) {
-        currentClass.history[dateStr] = {
-          rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false },
-          tablePoints: {},
-          studentPoints: {}
-        };
-      }
-    }
-
-    function getHistoryRecord(dateStr) {
-      ensureHistoryDateRecord(dateStr);
-      return getActiveClass().history[dateStr];
     }
 
     function saveData(triggerAutoSync = true) {
@@ -985,7 +972,6 @@
     function changePointsDate(newDate) {
       if (!newDate) return;
       selectedDate = newDate;
-      ensureHistoryDateRecord(selectedDate);
       renderApp();
     }
 
@@ -993,13 +979,11 @@
       const d = new Date(selectedDate + 'T00:00:00');
       d.setDate(d.getDate() + days);
       selectedDate = d.toISOString().split('T')[0];
-      ensureHistoryDateRecord(selectedDate);
       renderApp();
     }
 
     function setPointsDateToToday() {
       selectedDate = new Date().toISOString().split('T')[0];
-      ensureHistoryDateRecord(selectedDate);
       renderApp();
     }
 
@@ -1105,7 +1089,6 @@
     function switchClass(classId) {
       if (appData.classes[classId]) {
         appData.activeClassId = classId;
-        ensureHistoryDateRecord(selectedDate);
         saveData();
         renderApp();
       }
@@ -1138,8 +1121,8 @@
     ];
 
     function renderClassRubric() {
-      const historyRecord = getHistoryRecord(selectedDate);
-      const rubric = historyRecord.rubricScore;
+      const currentClass = getActiveClass();
+      const rubric = currentClass.rubricScore || {};
       const container = document.getElementById('rubricButtonsContainer');
       container.innerHTML = '';
 
@@ -1173,9 +1156,10 @@
     }
 
     function toggleRubricStep(key) {
-      const historyRecord = getHistoryRecord(selectedDate);
-      const currentVal = historyRecord.rubricScore[key];
-      historyRecord.rubricScore[key] = !currentVal;
+      const currentClass = getActiveClass();
+      if (!currentClass.rubricScore) currentClass.rubricScore = {};
+      const currentVal = currentClass.rubricScore[key];
+      currentClass.rubricScore[key] = !currentVal;
 
       if (!currentVal) playSound('ding');
       else playSound('dong');
@@ -1198,7 +1182,6 @@
       const grid = document.getElementById('tablesGrid');
       grid.innerHTML = '';
       const currentClass = getActiveClass();
-      const historyRecord = getHistoryRecord(selectedDate);
 
       if (!currentClass.tables || currentClass.tables.length === 0) {
         grid.innerHTML = `
@@ -1218,8 +1201,6 @@
         const tableCard = document.createElement('div');
         tableCard.className = `bg-slate-900 border ${colorStyle.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all resizable-box`;
 
-        const tablePts = historyRecord.tablePoints[table.id] || 0;
-
         let seatsHtml = '';
         const visibleStudents = table.students.filter(s => appData.showInactiveStudents || s.status !== 'inactive');
 
@@ -1230,7 +1211,6 @@
             const isAbsent = student.present === false;
             const isInactive = student.status === 'inactive';
             const hasComment = student.comment && student.comment.trim().length > 0;
-            const studentPts = historyRecord.studentPoints[student.id] || 0;
 
             seatsHtml += `
               <div 
@@ -1268,7 +1248,7 @@
 
                 <div class="flex items-center gap-1 shrink-0">
                   <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
-                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${studentPts}</span>
+                  <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${student.points || 0}</span>
                   <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center hover:bg-indigo-500 disabled:opacity-30">+</button>
                   <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1" title="Edit / Hide / Delete Student"><i class="fa-solid fa-pen"></i></button>
                 </div>
@@ -1314,7 +1294,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="addTablePoints('${table.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center hover:bg-slate-700">-</button>
-                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">${tablePts} pts</span>
+                <span class="text-xs font-extrabold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">${table.dailyPoints || 0} pts</span>
                 <button onclick="addTablePoints('${table.id}', 1)" class="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center hover:bg-amber-300">+1 Table</button>
               </div>
             </div>
@@ -1452,6 +1432,7 @@
           id: 'table_' + Date.now(),
           name: 'Main Table',
           color: 'blue',
+          dailyPoints: 0,
           students: []
         });
       }
@@ -1464,6 +1445,7 @@
             id: 'student_' + Date.now() + '_' + idx,
             name: name,
             seat: availableSeat,
+            points: 0,
             present: true,
             status: 'active',
             comment: ''
@@ -1478,6 +1460,7 @@
               id: 'student_' + Date.now() + '_' + idx,
               name: name,
               seat: availableSeat,
+              points: 0,
               present: true,
               status: 'active',
               comment: ''
@@ -1534,10 +1517,7 @@
 
       const student = table.students.find(s => s.id === studentId);
       if (student && student.present !== false && student.status !== 'inactive') {
-        const historyRecord = getHistoryRecord(selectedDate);
-        const currentPts = historyRecord.studentPoints[student.id] || 0;
-        historyRecord.studentPoints[student.id] = Math.max(0, currentPts + delta);
-
+        student.points = Math.max(0, (student.points || 0) + delta);
         if (delta > 0) playSound('ding');
         else playSound('dong');
         saveData();
@@ -1546,14 +1526,15 @@
     }
 
     function addTablePoints(tableId, delta) {
-      const historyRecord = getHistoryRecord(selectedDate);
-      const currentPts = historyRecord.tablePoints[tableId] || 0;
-      historyRecord.tablePoints[tableId] = Math.max(0, currentPts + delta);
-
-      if (delta > 0) playSound('ding');
-      else playSound('dong');
-      saveData();
-      renderTablesGrid();
+      const currentClass = getActiveClass();
+      const table = currentClass.tables.find(t => t.id === tableId);
+      if (table) {
+        table.dailyPoints = Math.max(0, (table.dailyPoints || 0) + delta);
+        if (delta > 0) playSound('ding');
+        else playSound('dong');
+        saveData();
+        renderTablesGrid();
+      }
     }
 
     function distributeTablePointsToPresent(tableId) {
@@ -1561,13 +1542,10 @@
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
 
-      const historyRecord = getHistoryRecord(selectedDate);
       let awarded = false;
-
       table.students.forEach(student => {
         if (student.present !== false && student.status !== 'inactive') {
-          const currentPts = historyRecord.studentPoints[student.id] || 0;
-          historyRecord.studentPoints[student.id] = currentPts + 1;
+          student.points = (student.points || 0) + 1;
           awarded = true;
         }
       });
@@ -1580,10 +1558,9 @@
     }
 
     function resetDailyTablePoints() {
-      openCustomConfirm(`Reset Points for ${selectedDate}?`, `This will reset all student and group points for ${selectedDate} to 0.`, () => {
-        const historyRecord = getHistoryRecord(selectedDate);
-        historyRecord.tablePoints = {};
-        historyRecord.studentPoints = {};
+      openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
+        const currentClass = getActiveClass();
+        currentClass.tables.forEach(t => t.dailyPoints = 0);
         saveData();
         renderTablesGrid();
       });
@@ -1677,6 +1654,7 @@
           name: nameInput,
           seat: seatVal,
           status: statusVal,
+          points: 0,
           present: true,
           comment: commentInput
         });
@@ -1700,7 +1678,7 @@
       if (!student) return;
 
       closeStudentModal();
-      openCustomConfirm(`Delete ${student.name}?`, "This will permanently remove the student from seating and roster.", () => {
+      openCustomConfirm(`Delete ${student.name}?`, "This will permanently remove the student and their points.", () => {
         table.students = table.students.filter(s => s.id !== studentId);
         saveData();
         renderTablesGrid();
@@ -1754,6 +1732,7 @@
           id: 'table_' + Date.now(),
           name: nameInput,
           color: colorVal,
+          dailyPoints: 0,
           students: []
         });
       }
@@ -1833,13 +1812,12 @@
         vocab: '',
         materials: '',
         notes: '',
-        history: {},
+        rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
         tables: []
       };
 
       appData.activeClassId = id;
       nameInput.value = '';
-      ensureHistoryDateRecord(selectedDate);
       saveData();
       renderApp();
       renderClassListInModal();
@@ -1873,7 +1851,6 @@
         if (appData.activeClassId === classId) {
           appData.activeClassId = Object.keys(appData.classes)[0];
         }
-        ensureHistoryDateRecord(selectedDate);
         saveData();
         renderApp();
       });
