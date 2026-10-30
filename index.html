@@ -75,7 +75,6 @@
       min-height: 160px;
     }
 
-    /* Remove spinner arrows from number inputs for clean timer look */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -85,7 +84,6 @@
       -moz-appearance: textfield;
     }
 
-    /* Dark styling for date input */
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1);
       cursor: pointer;
@@ -122,10 +120,16 @@
           </select>
         </div>
 
-        <!-- Google Sheets Sync Button -->
-        <button id="syncButton" onclick="syncWithGoogleSheets()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-bold px-3 py-2 rounded-xl border border-emerald-500/30 transition flex items-center gap-1.5">
+        <!-- Submit Active Class Data Button -->
+        <button id="submitClassDataBtn" onclick="submitActiveClassData()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black px-3.5 py-2 rounded-xl border border-amber-400 shadow-md transition flex items-center gap-1.5">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span id="submitBtnText">Submit Class Data</span>
+        </button>
+
+        <!-- Google Sheets Settings / Sync -->
+        <button id="syncButton" onclick="openSettingsModal()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-bold px-3 py-2 rounded-xl border border-emerald-500/30 transition flex items-center gap-1.5">
           <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i>
-          <span id="syncButtonText">Sheets Sync</span>
+          <span>Sheets URL</span>
         </button>
 
         <!-- Manage Classes Button -->
@@ -201,7 +205,7 @@
           <span id="timerStatusBadge" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold">READY</span>
         </div>
 
-        <!-- Big Digital Timer Display with Interactive Type-in Inputs -->
+        <!-- Digital Timer Display -->
         <div class="my-auto py-2 flex items-center justify-center gap-1 font-mono text-amber-400">
           <input 
             type="number" 
@@ -228,9 +232,8 @@
           />
         </div>
 
-        <!-- Quick Add / Subtract & Preset Time Controls -->
+        <!-- Quick Controls -->
         <div class="flex flex-col gap-2 w-full">
-          <!-- Adjust Time On The Fly (+ / -) -->
           <div class="flex flex-wrap items-center justify-center gap-1.5">
             <button onclick="adjustTimerSeconds(-300)" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition">-5m</button>
             <button onclick="adjustTimerSeconds(-60)" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition">-1m</button>
@@ -239,7 +242,6 @@
             <button onclick="adjustTimerSeconds(300)" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-bold border border-emerald-500/30 transition">+5m</button>
           </div>
 
-          <!-- Presets -->
           <div class="flex flex-wrap items-center justify-center gap-1.5">
             <button onclick="setTimerMinutes(1)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">1m</button>
             <button onclick="setTimerMinutes(5)" class="px-2 py-1 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold border border-slate-800 transition">5m</button>
@@ -249,7 +251,6 @@
           </div>
         </div>
 
-        <!-- Timer Controls -->
         <div class="flex items-center gap-3 w-full pt-2 border-t border-slate-800">
           <button id="startTimerBtn" onclick="toggleTimer()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-play"></i> Start Timer
@@ -263,7 +264,6 @@
       <!-- RIGHT HALF (1/2): CURRICULUM STATEMENTS & NOTES -->
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 resizable-box flex flex-col justify-between">
         
-        <!-- 1. TEXAS TEKS SECTION -->
         <div class="space-y-1">
           <label for="classTeksInput" class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
             <i class="fa-solid fa-star"></i> Texas TEKS Standards
@@ -271,7 +271,6 @@
           <textarea id="classTeksInput" oninput="saveCurriculumDetails()" rows="2" placeholder="Enter Texas TEKS standards for this unit..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-amber-400 placeholder:text-slate-600 transition resize-y"></textarea>
         </div>
 
-        <!-- 2. I CAN STATEMENTS SECTION -->
         <div class="space-y-1">
           <label for="classICanInput" class="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
             <i class="fa-solid fa-bullseye"></i> "I Can" Statements
@@ -279,7 +278,6 @@
           <textarea id="classICanInput" oninput="saveCurriculumDetails()" rows="2" placeholder="e.g. I can identify warm and cool colors..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder:text-slate-600 transition resize-y"></textarea>
         </div>
 
-        <!-- 3. VOCABULARY SECTION -->
         <div class="space-y-1">
           <label for="classVocabInput" class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
             <i class="fa-solid fa-book-bookmark"></i> Key Vocabulary
@@ -287,7 +285,6 @@
           <textarea id="classVocabInput" oninput="saveCurriculumDetails()" rows="2" placeholder="List vocabulary terms (e.g. Monochromatic, Balance)..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 transition resize-y"></textarea>
         </div>
 
-        <!-- 4. MATERIALS & SUPPLIES SECTION -->
         <div class="space-y-1">
           <label for="classMaterialsInput" class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
             <i class="fa-solid fa-boxes-packing"></i> Class Materials & Supplies
@@ -295,7 +292,6 @@
           <textarea id="classMaterialsInput" oninput="saveCurriculumDetails()" rows="2" placeholder="List supplies needed for this lesson..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-200 focus:outline-none focus:border-cyan-400 placeholder:text-slate-600 transition resize-y"></textarea>
         </div>
 
-        <!-- 5. CLASS NOTES & DAILY REMINDERS -->
         <div class="space-y-1">
           <div class="flex items-center justify-between">
             <label for="classNotesInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -369,7 +365,7 @@
     <p>Art Points Studio Ed &bull; Interactive Classroom Management</p>
   </footer>
 
-  <!-- MODAL 1: BULK NAME UPLOAD MODAL -->
+  <!-- MODALS -->
   <div id="bulkImportModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -404,7 +400,6 @@
     </div>
   </div>
 
-  <!-- MODAL 2: ARTIST PICKER MODAL -->
   <div id="artistModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl text-center space-y-5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -430,7 +425,6 @@
     </div>
   </div>
 
-  <!-- MODAL 3: CLASS MANAGER MODAL -->
   <div id="classModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -457,7 +451,6 @@
     </div>
   </div>
 
-  <!-- MODAL 4: ADD / EDIT STUDENT MODAL -->
   <div id="studentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -518,7 +511,6 @@
     </div>
   </div>
 
-  <!-- MODAL 5: ADD / EDIT TABLE MODAL -->
   <div id="tableModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -563,7 +555,6 @@
     </div>
   </div>
 
-  <!-- MODAL 6: CUSTOM CONFIRMATION ACTION MODAL -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 shadow-2xl text-center space-y-4">
       <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-rose-500/20">
@@ -584,7 +575,6 @@
     </div>
   </div>
 
-  <!-- MODAL 7: SETTINGS MODAL -->
   <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -650,7 +640,6 @@
   </div>
 
   <script>
-    /* PRIMARY STATE & GLOBAL VARS */
     const PRIMARY_STORAGE_KEY = 'ART_POINTS_STUDIO_ED_DATA';
 
     const DEFAULT_APP_STATE = {
@@ -681,9 +670,9 @@
     let pendingConfirmAction = null;
     let selectedDate = new Date().toISOString().split('T')[0];
 
-    /* ENHANCED CLASS TIMER ENGINE */
+    /* TIMER */
     let timerInterval = null;
-    let timerTotalSeconds = 600; // Default 10 min
+    let timerTotalSeconds = 600;
     let timerRemainingSeconds = 600;
     let isTimerRunning = false;
 
@@ -694,41 +683,19 @@
       const minInput = document.getElementById('timerMinInput');
       const secInput = document.getElementById('timerSecInput');
       
-      if (minInput && document.activeElement !== minInput) {
-        minInput.value = mins.toString().padStart(2, '0');
-      }
-      if (secInput && document.activeElement !== secInput) {
-        secInput.value = secs.toString().padStart(2, '0');
-      }
+      if (minInput && document.activeElement !== minInput) minInput.value = mins.toString().padStart(2, '0');
+      if (secInput && document.activeElement !== secInput) secInput.value = secs.toString().padStart(2, '0');
     }
 
     function applyManualTimerInputs() {
       const minInput = document.getElementById('timerMinInput');
       const secInput = document.getElementById('timerSecInput');
-      
       let mins = parseInt(minInput.value, 10) || 0;
       let secs = parseInt(secInput.value, 10) || 0;
-      
-      if (secs >= 60) {
-        mins += Math.floor(secs / 60);
-        secs = secs % 60;
-      }
-
-      mins = Math.max(0, mins);
-      secs = Math.max(0, secs);
-
-      timerTotalSeconds = (mins * 60) + secs;
+      if (secs >= 60) { mins += Math.floor(secs / 60); secs = secs % 60; }
+      timerTotalSeconds = (Math.max(0, mins) * 60) + Math.max(0, secs);
       timerRemainingSeconds = timerTotalSeconds;
-      
       updateTimerDisplay();
-      
-      if (!isTimerRunning) {
-        const badge = document.getElementById('timerStatusBadge');
-        if (badge) {
-          badge.textContent = 'READY';
-          badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
-        }
-      }
     }
 
     function adjustTimerSeconds(amount) {
@@ -743,53 +710,23 @@
       timerTotalSeconds = mins * 60;
       timerRemainingSeconds = timerTotalSeconds;
       updateTimerDisplay();
-      const badge = document.getElementById('timerStatusBadge');
-      if (badge) {
-        badge.textContent = 'READY';
-        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
-      }
     }
 
-    function toggleTimer() {
-      if (isTimerRunning) {
-        pauseTimer();
-      } else {
-        startTimer();
-      }
-    }
+    function toggleTimer() { isTimerRunning ? pauseTimer() : startTimer(); }
 
     function startTimer() {
       if (timerRemainingSeconds <= 0) return;
       isTimerRunning = true;
-      const startBtn = document.getElementById('startTimerBtn');
-      if (startBtn) {
-        startBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Timer';
-        startBtn.className = 'flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
-      }
-
-      const badge = document.getElementById('timerStatusBadge');
-      if (badge) {
-        badge.textContent = 'RUNNING';
-        badge.className = 'text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold';
-      }
-
+      document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-pause"></i> Pause Timer';
       timerInterval = setInterval(() => {
         timerRemainingSeconds--;
         updateTimerDisplay();
-
         if (timerRemainingSeconds <= 0) {
           clearInterval(timerInterval);
           isTimerRunning = false;
           playSound('fanfare');
           triggerConfetti();
-          if (badge) {
-            badge.textContent = 'TIME UP!';
-            badge.className = 'text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full font-bold';
-          }
-          if (startBtn) {
-            startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
-            startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
-          }
+          document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
         }
       }, 1000);
     }
@@ -797,16 +734,7 @@
     function pauseTimer() {
       clearInterval(timerInterval);
       isTimerRunning = false;
-      const startBtn = document.getElementById('startTimerBtn');
-      if (startBtn) {
-        startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Resume Timer';
-        startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
-      }
-      const badge = document.getElementById('timerStatusBadge');
-      if (badge) {
-        badge.textContent = 'PAUSED';
-        badge.className = 'text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold';
-      }
+      document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-play"></i> Resume Timer';
     }
 
     function resetTimer() {
@@ -814,99 +742,103 @@
       isTimerRunning = false;
       timerRemainingSeconds = timerTotalSeconds;
       updateTimerDisplay();
-      const startBtn = document.getElementById('startTimerBtn');
-      if (startBtn) {
-        startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
-        startBtn.className = 'flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow transition flex items-center justify-center gap-2';
-      }
-      const badge = document.getElementById('timerStatusBadge');
-      if (badge) {
-        badge.textContent = 'READY';
-        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold';
-      }
+      document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-play"></i> Start Timer';
     }
 
-    /* WEB AUDIO SYNTHESIZER */
+    /* SOUND SYNTHESIZER */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     function playSound(type) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      osc.connect(gain); gain.connect(audioCtx.destination);
       const now = audioCtx.currentTime;
 
       if (type === 'ding') {
-        osc.type = 'sine';
         osc.frequency.setValueAtTime(587.33, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'dong') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(300, now);
         osc.frequency.exponentialRampToValueAtTime(150, now + 0.2);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-        osc.start(now);
-        osc.stop(now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
       } else if (type === 'fanfare') {
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
           const osc2 = audioCtx.createOscillator();
           const gain2 = audioCtx.createGain();
-          osc2.connect(gain2);
-          gain2.connect(audioCtx.destination);
+          osc2.connect(gain2); gain2.connect(audioCtx.destination);
           osc2.frequency.value = freq;
           gain2.gain.setValueAtTime(0.15, now + idx * 0.1);
           gain2.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
-          osc2.start(now + idx * 0.1);
-          osc2.stop(now + idx * 0.1 + 0.4);
+          osc2.start(now + idx * 0.1); osc2.stop(now + idx * 0.1 + 0.4);
         });
       }
     }
 
-    /* DATA LOADING & VALIDATION */
+    /* SUBMIT ACTIVE CLASS DATA ONLY */
+    async function submitActiveClassData() {
+      if (!appData || !appData.googleWebAppUrl) {
+        alert("Please set up your Google Sheets Web App URL in Settings first.");
+        openSettingsModal();
+        return;
+      }
+
+      const btnText = document.getElementById('submitBtnText');
+      if (btnText) btnText.textContent = "Submitting...";
+
+      const payload = {
+        activeClassId: appData.activeClassId,
+        selectedDate: selectedDate,
+        classes: {
+          [appData.activeClassId]: getActiveClass()
+        }
+      };
+
+      try {
+        await fetch(appData.googleWebAppUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (btnText) btnText.textContent = "Submitted!";
+        playSound('fanfare');
+        triggerConfetti();
+        setTimeout(() => { if (btnText) btnText.textContent = "Submit Class Data"; }, 2500);
+
+      } catch (err) {
+        console.error("Submission failed:", err);
+        if (btnText) btnText.textContent = "Failed!";
+        setTimeout(() => { if (btnText) btnText.textContent = "Submit Class Data"; }, 2500);
+      }
+    }
+
+    /* DATA STATE LOADING */
     function loadAndMigrateData() {
       const primaryData = localStorage.getItem(PRIMARY_STORAGE_KEY);
       if (primaryData) {
-        try {
-          appData = JSON.parse(primaryData);
-        } catch (e) {
-          console.error("Error reading storage", e);
-        }
+        try { appData = JSON.parse(primaryData); } catch (e) { console.error("Error reading storage", e); }
       }
-
-      if (!appData) {
-        appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
-      }
-
+      if (!appData) appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
       validateAndSanitizeState();
       saveData(false);
     }
 
     function validateAndSanitizeState() {
-      if (!appData || typeof appData !== 'object') {
-        appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
-        return;
-      }
-
-      if (!appData.classes || Object.keys(appData.classes).length === 0) {
-        appData.classes = JSON.parse(JSON.stringify(DEFAULT_APP_STATE.classes));
-      }
-
-      if (!appData.activeClassId || !appData.classes[appData.activeClassId]) {
-        appData.activeClassId = Object.keys(appData.classes)[0];
-      }
-
+      if (!appData || typeof appData !== 'object') appData = JSON.parse(JSON.stringify(DEFAULT_APP_STATE));
+      if (!appData.classes || Object.keys(appData.classes).length === 0) appData.classes = JSON.parse(JSON.stringify(DEFAULT_APP_STATE.classes));
+      if (!appData.activeClassId || !appData.classes[appData.activeClassId]) appData.activeClassId = Object.keys(appData.classes)[0];
       if (appData.showInactiveStudents === undefined) appData.showInactiveStudents = false;
       if (appData.googleWebAppUrl === undefined) appData.googleWebAppUrl = '';
       if (appData.autoSync === undefined) appData.autoSync = false;
 
       const today = new Date().toISOString().split('T')[0];
-
       Object.values(appData.classes).forEach(cls => {
         if (cls.teks === undefined) cls.teks = '';
         if (cls.iCan === undefined) cls.iCan = '';
@@ -922,7 +854,6 @@
         cls.tables.forEach(table => {
           if (table.dailyPoints === undefined) table.dailyPoints = 0;
           if (!table.students || !Array.isArray(table.students)) table.students = [];
-
           table.students.forEach((student, index) => {
             if (student.present === undefined) student.present = true;
             if (student.status === undefined) student.status = 'active';
@@ -934,15 +865,8 @@
       });
     }
 
-    function saveData(triggerAutoSync = true) {
-      try {
-        localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(appData));
-        if (triggerAutoSync && appData.autoSync && appData.googleWebAppUrl) {
-          syncWithGoogleSheets(true);
-        }
-      } catch (e) {
-        console.error("Failed to save state:", e);
-      }
+    function saveData() {
+      try { localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(appData)); } catch (e) { console.error("Failed to save state:", e); }
     }
 
     function getActiveClass() {
@@ -954,93 +878,40 @@
       const currentClass = getActiveClass();
       if (!currentClass) return;
 
-      const teks = document.getElementById('classTeksInput');
-      const iCan = document.getElementById('classICanInput');
-      const vocab = document.getElementById('classVocabInput');
-      const materials = document.getElementById('classMaterialsInput');
-      const notes = document.getElementById('classNotesInput');
-
-      if (teks) currentClass.teks = teks.value;
-      if (iCan) currentClass.iCan = iCan.value;
-      if (vocab) currentClass.vocab = vocab.value;
-      if (materials) currentClass.materials = materials.value;
-      if (notes) currentClass.notes = notes.value;
+      currentClass.teks = document.getElementById('classTeksInput').value;
+      currentClass.iCan = document.getElementById('classICanInput').value;
+      currentClass.vocab = document.getElementById('classVocabInput').value;
+      currentClass.materials = document.getElementById('classMaterialsInput').value;
+      currentClass.notes = document.getElementById('classNotesInput').value;
 
       saveData();
     }
 
     /* TOP BAR DATE CONTROL FUNCTIONS */
-    function changePointsDate(newDate) {
-      if (!newDate) return;
-      selectedDate = newDate;
-      renderApp();
-    }
-
+    function changePointsDate(newDate) { if (!newDate) return; selectedDate = newDate; renderApp(); }
     function shiftPointsDate(days) {
       const d = new Date(selectedDate + 'T00:00:00');
       d.setDate(d.getDate() + days);
       selectedDate = d.toISOString().split('T')[0];
       renderApp();
     }
-
-    function setPointsDateToToday() {
-      selectedDate = new Date().toISOString().split('T')[0];
-      renderApp();
-    }
-
-    /* GOOGLE SHEETS API SYNC */
-    async function syncWithGoogleSheets(isBackground = false) {
-      const url = appData ? appData.googleWebAppUrl : '';
-      const syncBtnText = document.getElementById('syncButtonText');
-
-      if (!url) {
-        if (!isBackground) openSettingsModal();
-        return;
-      }
-
-      if (!isBackground && syncBtnText) syncBtnText.textContent = "Syncing...";
-
-      try {
-        await fetch(url, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(appData)
-        });
-
-        if (!isBackground) {
-          if (syncBtnText) syncBtnText.textContent = "Synced!";
-          setTimeout(() => { if (syncBtnText) syncBtnText.textContent = "Sheets Sync"; }, 2000);
-          playSound('ding');
-        }
-      } catch (err) {
-        console.error("Google Sheets Sync failed:", err);
-        if (!isBackground) {
-          if (syncBtnText) syncBtnText.textContent = "Sync Failed";
-          setTimeout(() => { if (syncBtnText) syncBtnText.textContent = "Sheets Sync"; }, 2000);
-        }
-      }
-    }
+    function setPointsDateToToday() { selectedDate = new Date().toISOString().split('T')[0]; renderApp(); }
 
     function saveGoogleSheetsSettings() {
       const urlInput = document.getElementById('googleWebAppUrlInput').value.trim();
       const autoSyncCheck = document.getElementById('autoSyncCheckbox').checked;
-
       if (appData) {
         appData.googleWebAppUrl = urlInput;
         appData.autoSync = autoSyncCheck;
-        saveData(false);
+        saveData();
       }
-
-      if (urlInput) syncWithGoogleSheets();
+      closeSettingsModal();
     }
 
-    /* RENDERERS */
+    /* RENDER FUNCTIONS */
     function renderApp() {
       const datePicker = document.getElementById('topDatePicker');
-      if (datePicker && datePicker.value !== selectedDate) {
-        datePicker.value = selectedDate;
-      }
+      if (datePicker && datePicker.value !== selectedDate) datePicker.value = selectedDate;
 
       renderClassSelect();
       renderDateBadge();
@@ -1053,15 +924,13 @@
 
     function updateInactiveToggleButton() {
       const btnLabel = document.getElementById('toggleInactiveLabel');
-      if (btnLabel && appData) {
-        btnLabel.textContent = appData.showInactiveStudents ? "Hide Inactive Students" : "Show Inactive Students";
-      }
+      if (btnLabel && appData) btnLabel.textContent = appData.showInactiveStudents ? "Hide Inactive Students" : "Show Inactive Students";
     }
 
     function toggleShowInactive() {
       if (!appData) return;
       appData.showInactiveStudents = !appData.showInactiveStudents;
-      saveData(false);
+      saveData();
       updateInactiveToggleButton();
       renderTablesGrid();
     }
@@ -1069,19 +938,14 @@
     function renderDateBadge() {
       const d = new Date(selectedDate + 'T00:00:00');
       const formatted = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-      
-      const topBadge = document.getElementById('topDateFormatted');
-      if (topBadge) topBadge.textContent = formatted;
-
-      const rubricBadge = document.getElementById('currentDateBadge');
-      if (rubricBadge) rubricBadge.textContent = formatted;
+      document.getElementById('topDateFormatted').textContent = formatted;
+      document.getElementById('currentDateBadge').textContent = formatted;
     }
 
     function renderClassSelect() {
       const select = document.getElementById('classSelect');
       if (!select || !appData || !appData.classes) return;
       select.innerHTML = '';
-
       Object.values(appData.classes).forEach(cls => {
         const option = document.createElement('option');
         option.value = cls.id;
@@ -1102,21 +966,13 @@
     function renderCurriculumDetails() {
       const currentClass = getActiveClass();
       if (!currentClass) return;
-
-      const teks = document.getElementById('classTeksInput');
-      const iCan = document.getElementById('classICanInput');
-      const vocab = document.getElementById('classVocabInput');
-      const materials = document.getElementById('classMaterialsInput');
-      const notes = document.getElementById('classNotesInput');
-
-      if (teks) teks.value = currentClass.teks || '';
-      if (iCan) iCan.value = currentClass.iCan || '';
-      if (vocab) vocab.value = currentClass.vocab || '';
-      if (materials) materials.value = currentClass.materials || '';
-      if (notes) notes.value = currentClass.notes || '';
+      document.getElementById('classTeksInput').value = currentClass.teks || '';
+      document.getElementById('classICanInput').value = currentClass.iCan || '';
+      document.getElementById('classVocabInput').value = currentClass.vocab || '';
+      document.getElementById('classMaterialsInput').value = currentClass.materials || '';
+      document.getElementById('classNotesInput').value = currentClass.notes || '';
     }
 
-    /* ROUTINE RUBRIC ENGINE */
     const RUBRIC_STEPS = [
       { key: 'warmup', label: '1. Enter / Warm Up', icon: 'fa-door-open' },
       { key: 'instruction', label: '2. Instruction', icon: 'fa-chalkboard' },
@@ -1134,17 +990,14 @@
       container.innerHTML = '';
 
       let earned = 0;
-
       RUBRIC_STEPS.forEach(step => {
         const isChecked = rubric[step.key] === true;
         if (isChecked) earned++;
-
         const btn = document.createElement('button');
         btn.onclick = () => toggleRubricStep(step.key);
         btn.className = `p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-md ${
           isChecked ? 'bg-amber-400/10 border-amber-400/50 text-amber-300' : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
         }`;
-
         btn.innerHTML = `
           <div class="flex items-center justify-between">
             <i class="fa-solid ${step.icon} ${isChecked ? 'text-amber-400' : 'text-slate-500'}"></i>
@@ -1154,14 +1007,11 @@
           </div>
           <span class="text-xs font-bold leading-tight">${step.label}</span>
         `;
-
         container.appendChild(btn);
       });
 
-      const scoreBadge = document.getElementById('classScoreBadge');
-      const progressBar = document.getElementById('classProgressBar');
-      if (scoreBadge) scoreBadge.textContent = `${earned} / 5 Points`;
-      if (progressBar) progressBar.style.width = `${(earned / 5) * 100}%`;
+      document.getElementById('classScoreBadge').textContent = `${earned} / 5 Points`;
+      document.getElementById('classProgressBar').style.width = `${(earned / 5) * 100}%`;
     }
 
     function toggleRubricStep(key) {
@@ -1170,15 +1020,11 @@
       if (!currentClass.rubricScore) currentClass.rubricScore = {};
       const currentVal = currentClass.rubricScore[key];
       currentClass.rubricScore[key] = !currentVal;
-
-      if (!currentVal) playSound('ding');
-      else playSound('dong');
-
+      currentVal ? playSound('dong') : playSound('ding');
       saveData();
       renderClassRubric();
     }
 
-    /* TABLES & SEATING GRID */
     const COLOR_CLASSES = {
       red: { border: 'border-red-500/40', bg: 'bg-red-500/10' },
       orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10' },
@@ -1200,9 +1046,7 @@
           <div class="col-span-full bg-slate-900 border border-dashed border-slate-800 rounded-3xl p-12 text-center text-slate-500 space-y-3">
             <i class="fa-solid fa-chair text-3xl"></i>
             <p class="text-sm font-medium">No studio tables created yet for this class.</p>
-            <button onclick="openAddTableModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-500">
-              + Add First Table
-            </button>
+            <button onclick="openAddTableModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-500">+ Add First Table</button>
           </div>
         `;
         return;
@@ -1218,7 +1062,6 @@
 
         for (let seatNum = 1; seatNum <= 5; seatNum++) {
           const student = visibleStudents.find(s => parseInt(s.seat, 10) === seatNum);
-
           if (student) {
             const isAbsent = student.present === false;
             const isInactive = student.status === 'inactive';
@@ -1236,17 +1079,12 @@
               >
                 <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
                   <span class="text-slate-600 hover:text-slate-400 text-xs px-0.5 shrink-0"><i class="fa-solid fa-grip-vertical"></i></span>
-
-                  <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
-                    Seat ${seatNum}
-                  </span>
+                  <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">Seat ${seatNum}</span>
 
                   ${isInactive ? `
-                    <button onclick="toggleStudentStatus('${table.id}', '${student.id}')" title="Student is Inactive/Hidden. Click to activate." class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
-                      INACTIVE
-                    </button>
+                    <button onclick="toggleStudentStatus('${table.id}', '${student.id}')" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">INACTIVE</button>
                   ` : `
-                    <button onclick="toggleAttendance('${table.id}', '${student.id}')" title="${isAbsent ? 'Mark Present' : 'Mark Absent'}" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+                    <button onclick="toggleAttendance('${table.id}', '${student.id}')" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded transition shrink-0 ${isAbsent ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
                       ${isAbsent ? 'ABSENT' : 'PRESENT'}
                     </button>
                   `}
@@ -1254,7 +1092,6 @@
                   <span class="font-bold text-xs leading-snug break-words flex-1 ${isAbsent || isInactive ? 'line-through text-slate-500' : 'text-slate-100'}">
                     ${escapeHtml(student.name)}
                   </span>
-
                   ${hasComment ? `<span class="text-amber-400 text-xs shrink-0 cursor-pointer" title="Note: ${escapeHtml(student.comment)}"><i class="fa-solid fa-comment"></i></span>` : ''}
                 </div>
 
@@ -1262,7 +1099,7 @@
                   <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center disabled:opacity-30">-</button>
                   <span class="text-xs font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 min-w-[24px] text-center">${student.points || 0}</span>
                   <button ${isAbsent || isInactive ? 'disabled' : ''} onclick="addStudentPoint('${table.id}', '${student.id}', 1)" class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center hover:bg-indigo-500 disabled:opacity-30">+</button>
-                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1" title="Edit / Hide / Delete Student"><i class="fa-solid fa-pen"></i></button>
+                  <button onclick="openEditStudentModal('${table.id}', '${student.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs ml-1"><i class="fa-solid fa-pen"></i></button>
                 </div>
               </div>
             `;
@@ -1278,9 +1115,7 @@
                   <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-900 text-slate-600 border border-slate-800 shrink-0">Seat ${seatNum}</span>
                   <span class="italic text-[11px] text-slate-600">Empty Seat</span>
                 </div>
-                <button onclick="openAddStudentModal('${table.id}', ${seatNum})" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 transition">
-                  + Seat
-                </button>
+                <button onclick="openAddStudentModal('${table.id}', ${seatNum})" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 transition">+ Seat</button>
               </div>
             `;
           }
@@ -1294,8 +1129,8 @@
                 <h3 class="font-black text-base text-white tracking-tight">${escapeHtml(table.name)}</h3>
               </div>
               <div class="flex items-center gap-1">
-                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs" title="Edit Table"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="triggerDeleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs" title="Delete Table"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="openEditTableModal('${table.id}')" class="text-slate-500 hover:text-amber-400 p-1 text-xs"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="triggerDeleteTable('${table.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>
 
@@ -1333,44 +1168,32 @@
       });
     }
 
-    /* DRAG AND DROP HANDLERS */
+    /* DRAG & DROP */
     function handleSeatDragStart(e, sourceTableId, sourceSeat, studentId) {
       draggedSeatInfo = { sourceTableId, sourceSeat, studentId };
       e.target.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', JSON.stringify(draggedSeatInfo));
     }
-
     function handleSeatDragEnd(e) {
       e.target.classList.remove('dragging');
       draggedSeatInfo = null;
       document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
     }
-
-    function handleSeatDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      e.currentTarget.classList.add('drop-target');
-    }
-
-    function handleSeatDragLeave(e) {
-      e.currentTarget.classList.remove('drop-target');
-    }
+    function handleSeatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-target'); }
+    function handleSeatDragLeave(e) { e.currentTarget.classList.remove('drop-target'); }
 
     function handleSeatDrop(e, targetTableId, targetSeat) {
       e.preventDefault();
       e.currentTarget.classList.remove('drop-target');
-
       if (!draggedSeatInfo) return;
       const { sourceTableId, sourceSeat, studentId } = draggedSeatInfo;
-
       if (sourceTableId === targetTableId && sourceSeat === targetSeat) return;
 
       const currentClass = getActiveClass();
       if (!currentClass) return;
       const sourceTable = currentClass.tables.find(t => t.id === sourceTableId);
       const targetTable = currentClass.tables.find(t => t.id === targetTableId);
-
       if (!sourceTable || !targetTable) return;
 
       const student = sourceTable.students.find(s => s.id === studentId);
@@ -1381,11 +1204,9 @@
       if (existingOccupant) {
         existingOccupant.seat = sourceSeat;
         student.seat = targetSeat;
-
         if (sourceTableId !== targetTableId) {
           sourceTable.students = sourceTable.students.filter(s => s.id !== student.id);
           targetTable.students = targetTable.students.filter(s => s.id !== existingOccupant.id);
-          
           targetTable.students.push(student);
           sourceTable.students.push(existingOccupant);
         }
@@ -1402,12 +1223,11 @@
       renderTablesGrid();
     }
 
-    /* BULK ROSTER IMPORT */
+    /* ROSTER IMPORT & POINT CONTROLS */
     function openBulkImportModal() {
       const select = document.getElementById('bulkImportTableSelect');
       if (!select) return;
       select.innerHTML = '';
-
       const currentClass = getActiveClass();
       if (!currentClass) return;
 
@@ -1427,16 +1247,12 @@
       document.getElementById('bulkImportModal').classList.remove('hidden');
     }
 
-    function closeBulkImportModal() {
-      document.getElementById('bulkImportModal').classList.add('hidden');
-    }
+    function closeBulkImportModal() { document.getElementById('bulkImportModal').classList.add('hidden'); }
 
     function executeBulkImport() {
       const text = document.getElementById('bulkImportTextarea').value;
       const targetTableId = document.getElementById('bulkImportTableSelect').value;
-
       if (!text || text.trim() === '') return;
-
       const rawNames = text.split(/[\n,]+/).map(n => n.trim()).filter(n => n.length > 0);
       if (rawNames.length === 0) return;
 
@@ -1444,46 +1260,23 @@
       if (!currentClass) return;
 
       if (currentClass.tables.length === 0) {
-        currentClass.tables.push({
-          id: 'table_' + Date.now(),
-          name: 'Main Table',
-          color: 'blue',
-          dailyPoints: 0,
-          students: []
-        });
+        currentClass.tables.push({ id: 'table_' + Date.now(), name: 'Main Table', color: 'blue', dailyPoints: 0, students: [] });
       }
 
-      if (targetTableId === 'AUTO_DISTRIBUTE') {
-        rawNames.forEach((name, idx) => {
-          const table = currentClass.tables[idx % currentClass.tables.length];
-          const availableSeat = getFirstAvailableSeat(table);
+      rawNames.forEach((name, idx) => {
+        const table = targetTableId === 'AUTO_DISTRIBUTE' ? currentClass.tables[idx % currentClass.tables.length] : currentClass.tables.find(t => t.id === targetTableId);
+        if (table) {
           table.students.push({
             id: 'student_' + Date.now() + '_' + idx,
             name: name,
-            seat: availableSeat,
+            seat: getFirstAvailableSeat(table),
             points: 0,
             present: true,
             status: 'active',
             comment: ''
           });
-        });
-      } else {
-        const table = currentClass.tables.find(t => t.id === targetTableId);
-        if (table) {
-          rawNames.forEach((name, idx) => {
-            const availableSeat = getFirstAvailableSeat(table);
-            table.students.push({
-              id: 'student_' + Date.now() + '_' + idx,
-              name: name,
-              seat: availableSeat,
-              points: 0,
-              present: true,
-              status: 'active',
-              comment: ''
-            });
-          });
         }
-      }
+      });
 
       saveData();
       renderTablesGrid();
@@ -1494,25 +1287,17 @@
     function getFirstAvailableSeat(table) {
       if (!table || !table.students) return 1;
       const occupiedSeats = table.students.filter(s => s.status !== 'inactive').map(s => parseInt(s.seat, 10));
-      for (let s = 1; s <= 5; s++) {
-        if (!occupiedSeats.includes(s)) return s;
-      }
+      for (let s = 1; s <= 5; s++) { if (!occupiedSeats.includes(s)) return s; }
       return table.students.length + 1;
     }
 
-    /* STUDENT & ATTENDANCE ACTIONS */
     function toggleAttendance(tableId, studentId) {
       const currentClass = getActiveClass();
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       const student = table.students.find(s => s.id === studentId);
-      if (student) {
-        student.present = student.present === false ? true : false;
-        saveData();
-        renderTablesGrid();
-      }
+      if (student) { student.present = student.present === false; saveData(); renderTablesGrid(); }
     }
 
     function toggleStudentStatus(tableId, studentId) {
@@ -1520,13 +1305,8 @@
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       const student = table.students.find(s => s.id === studentId);
-      if (student) {
-        student.status = student.status === 'inactive' ? 'active' : 'inactive';
-        saveData();
-        renderTablesGrid();
-      }
+      if (student) { student.status = student.status === 'inactive' ? 'active' : 'inactive'; saveData(); renderTablesGrid(); }
     }
 
     function addStudentPoint(tableId, studentId, delta) {
@@ -1534,12 +1314,10 @@
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       const student = table.students.find(s => s.id === studentId);
       if (student && student.present !== false && student.status !== 'inactive') {
         student.points = Math.max(0, (student.points || 0) + delta);
-        if (delta > 0) playSound('ding');
-        else playSound('dong');
+        delta > 0 ? playSound('ding') : playSound('dong');
         saveData();
         renderTablesGrid();
       }
@@ -1551,8 +1329,7 @@
       const table = currentClass.tables.find(t => t.id === tableId);
       if (table) {
         table.dailyPoints = Math.max(0, (table.dailyPoints || 0) + delta);
-        if (delta > 0) playSound('ding');
-        else playSound('dong');
+        delta > 0 ? playSound('ding') : playSound('dong');
         saveData();
         renderTablesGrid();
       }
@@ -1563,59 +1340,38 @@
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       let awarded = false;
       table.students.forEach(student => {
-        if (student.present !== false && student.status !== 'inactive') {
-          student.points = (student.points || 0) + 1;
-          awarded = true;
-        }
+        if (student.present !== false && student.status !== 'inactive') { student.points = (student.points || 0) + 1; awarded = true; }
       });
-
-      if (awarded) {
-        playSound('fanfare');
-        saveData();
-        renderTablesGrid();
-      }
+      if (awarded) { playSound('fanfare'); saveData(); renderTablesGrid(); }
     }
 
     function resetDailyTablePoints() {
       openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
         const currentClass = getActiveClass();
-        if (currentClass) {
-          currentClass.tables.forEach(t => t.dailyPoints = 0);
-          saveData();
-          renderTablesGrid();
-        }
+        if (currentClass) { currentClass.tables.forEach(t => t.dailyPoints = 0); saveData(); renderTablesGrid(); }
       });
     }
 
-    /* CUSTOM CONFIRMATION MODAL ENGINE */
+    /* CONFIRMATION & MODALS */
     function openCustomConfirm(title, message, onConfirm) {
       document.getElementById('confirmModalTitle').textContent = title;
       document.getElementById('confirmModalMessage').textContent = message;
       pendingConfirmAction = onConfirm;
-      
-      const btn = document.getElementById('confirmModalActionBtn');
-      btn.onclick = function() {
+      document.getElementById('confirmModalActionBtn').onclick = function() {
         if (pendingConfirmAction) pendingConfirmAction();
         closeConfirmModal();
       };
-
       document.getElementById('confirmModal').classList.remove('hidden');
     }
 
-    function closeConfirmModal() {
-      document.getElementById('confirmModal').classList.add('hidden');
-      pendingConfirmAction = null;
-    }
+    function closeConfirmModal() { document.getElementById('confirmModal').classList.add('hidden'); pendingConfirmAction = null; }
 
-    /* STUDENT MODAL & DELETION */
     function openAddStudentModal(tableId, preferredSeat = null) {
       const currentClass = getActiveClass();
       const table = currentClass ? currentClass.tables.find(t => t.id === tableId) : null;
       const targetSeat = preferredSeat || (table ? getFirstAvailableSeat(table) : 1);
-
       document.getElementById('studentModalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-indigo-400"></i> Add Student';
       document.getElementById('studentModalTableId').value = tableId;
       document.getElementById('studentModalStudentId').value = '';
@@ -1632,7 +1388,6 @@
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       const student = table.students.find(s => s.id === studentId);
       if (!student) return;
 
@@ -1647,9 +1402,7 @@
       document.getElementById('studentModal').classList.remove('hidden');
     }
 
-    function closeStudentModal() {
-      document.getElementById('studentModal').classList.add('hidden');
-    }
+    function closeStudentModal() { document.getElementById('studentModal').classList.add('hidden'); }
 
     function saveStudentFromModal() {
       const tableId = document.getElementById('studentModalTableId').value;
@@ -1658,7 +1411,6 @@
       const statusVal = document.getElementById('studentModalStatusSelect').value;
       const seatVal = parseInt(document.getElementById('studentModalSeatSelect').value, 10);
       const commentInput = document.getElementById('studentModalCommentInput').value.trim();
-
       if (!nameInput) return;
 
       const currentClass = getActiveClass();
@@ -1669,21 +1421,10 @@
       if (studentId) {
         const student = table.students.find(s => s.id === studentId);
         if (student) {
-          student.name = nameInput;
-          student.status = statusVal;
-          student.seat = seatVal;
-          student.comment = commentInput;
+          student.name = nameInput; student.status = statusVal; student.seat = seatVal; student.comment = commentInput;
         }
       } else {
-        table.students.push({
-          id: 'student_' + Date.now(),
-          name: nameInput,
-          seat: seatVal,
-          status: statusVal,
-          points: 0,
-          present: true,
-          comment: commentInput
-        });
+        table.students.push({ id: 'student_' + Date.now(), name: nameInput, seat: seatVal, status: statusVal, points: 0, present: true, comment: commentInput });
       }
 
       saveData();
@@ -1694,13 +1435,10 @@
     function confirmDeleteStudentFromModal() {
       const tableId = document.getElementById('studentModalTableId').value;
       const studentId = document.getElementById('studentModalStudentId').value;
-      if (!tableId || !studentId) return;
-
       const currentClass = getActiveClass();
       if (!currentClass) return;
       const table = currentClass.tables.find(t => t.id === tableId);
       if (!table) return;
-
       const student = table.students.find(s => s.id === studentId);
       if (!student) return;
 
@@ -1712,7 +1450,6 @@
       });
     }
 
-    /* TABLE MODAL & DELETION */
     function openAddTableModal() {
       document.getElementById('tableModalTitle').innerHTML = '<i class="fa-solid fa-plus text-emerald-400"></i> Add Studio Table';
       document.getElementById('tableModalTableId').value = '';
@@ -1736,15 +1473,12 @@
       document.getElementById('tableModal').classList.remove('hidden');
     }
 
-    function closeTableModal() {
-      document.getElementById('tableModal').classList.add('hidden');
-    }
+    function closeTableModal() { document.getElementById('tableModal').classList.add('hidden'); }
 
     function saveTableFromModal() {
       const tableId = document.getElementById('tableModalTableId').value;
       const nameInput = document.getElementById('tableModalNameInput').value.trim();
       const colorVal = document.getElementById('tableModalColorSelect').value;
-
       if (!nameInput) return;
 
       const currentClass = getActiveClass();
@@ -1752,18 +1486,9 @@
 
       if (tableId) {
         const table = currentClass.tables.find(t => t.id === tableId);
-        if (table) {
-          table.name = nameInput;
-          table.color = colorVal;
-        }
+        if (table) { table.name = nameInput; table.color = colorVal; }
       } else {
-        currentClass.tables.push({
-          id: 'table_' + Date.now(),
-          name: nameInput,
-          color: colorVal,
-          dailyPoints: 0,
-          students: []
-        });
+        currentClass.tables.push({ id: 'table_' + Date.now(), name: nameInput, color: colorVal, dailyPoints: 0, students: [] });
       }
 
       saveData();
@@ -1790,15 +1515,8 @@
       if (tableId) triggerDeleteTable(tableId);
     }
 
-    /* CLASS MODAL & DELETION */
-    function openClassModal() {
-      renderClassListInModal();
-      document.getElementById('classModal').classList.remove('hidden');
-    }
-
-    function closeClassModal() {
-      document.getElementById('classModal').classList.add('hidden');
-    }
+    function openClassModal() { renderClassListInModal(); document.getElementById('classModal').classList.remove('hidden'); }
+    function closeClassModal() { document.getElementById('classModal').classList.add('hidden'); }
 
     function renderClassListInModal() {
       const container = document.getElementById('classListContainer');
@@ -1807,24 +1525,18 @@
 
       Object.values(appData.classes).forEach(cls => {
         const isSelected = cls.id === appData.activeClassId;
-
         const item = document.createElement('div');
         item.className = 'flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl';
-
         item.innerHTML = `
           <div class="flex items-center gap-2">
-            <span class="font-bold text-sm ${isSelected ? 'text-amber-400' : 'text-slate-200'}">
-              ${escapeHtml(cls.name)}
-            </span>
+            <span class="font-bold text-sm ${isSelected ? 'text-amber-400' : 'text-slate-200'}">${escapeHtml(cls.name)}</span>
             ${isSelected ? '<span class="text-[10px] bg-amber-400/10 text-amber-300 font-extrabold px-2 py-0.5 rounded-full border border-amber-400/20">Active</span>' : ''}
           </div>
-
           <div class="flex items-center gap-1">
-            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs" title="Rename Class"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="triggerDeleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs" title="Delete Class"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="editClassName('${cls.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="triggerDeleteClass('${cls.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
-
         container.appendChild(item);
       });
     }
@@ -1836,13 +1548,7 @@
 
       const id = 'class_' + Date.now();
       appData.classes[id] = {
-        id: id,
-        name: name,
-        teks: '',
-        iCan: '',
-        vocab: '',
-        materials: '',
-        notes: '',
+        id: id, name: name, teks: '', iCan: '', vocab: '', materials: '', notes: '',
         rubricScore: { warmup: false, instruction: false, studio: false, cleanup: false, lineup: false, date: new Date().toISOString().split('T')[0] },
         tables: []
       };
@@ -1858,7 +1564,6 @@
       if (!appData || !appData.classes) return;
       const cls = appData.classes[classId];
       if (!cls) return;
-
       const newName = prompt("Edit class name:", cls.name);
       if (newName && newName.trim() !== '') {
         cls.name = newName.trim();
@@ -1881,34 +1586,26 @@
       closeClassModal();
       openCustomConfirm(`Delete "${cls.name}"?`, "This will permanently remove the entire class roster and settings.", () => {
         delete appData.classes[classId];
-        if (appData.activeClassId === classId) {
-          appData.activeClassId = Object.keys(appData.classes)[0];
-        }
+        if (appData.activeClassId === classId) appData.activeClassId = Object.keys(appData.classes)[0];
         saveData();
         renderApp();
       });
     }
 
-    /* ARTIST OF THE DAY RANDOM PICKER */
     function openArtistModal() {
       document.getElementById('artistWinnerDisplay').textContent = "Ready to Spin!";
       document.getElementById('artistWinnerSub').textContent = "Absent & inactive students are excluded";
       document.getElementById('artistModal').classList.remove('hidden');
     }
-
-    function closeArtistModal() {
-      document.getElementById('artistModal').classList.add('hidden');
-    }
+    function closeArtistModal() { document.getElementById('artistModal').classList.add('hidden'); }
 
     let isSpinning = false;
-
     function spinArtistOfTheDay() {
       if (isSpinning) return;
-
       const currentClass = getActiveClass();
       if (!currentClass) return;
-      const presentStudents = [];
 
+      const presentStudents = [];
       currentClass.tables.forEach(table => {
         table.students.forEach(student => {
           if (student.present !== false && student.status !== 'inactive') {
@@ -1929,8 +1626,6 @@
 
       isSpinning = true;
       let counter = 0;
-      const maxSpins = 20;
-
       const interval = setInterval(() => {
         const temp = presentStudents[Math.floor(Math.random() * presentStudents.length)];
         display.textContent = temp.name;
@@ -1938,7 +1633,7 @@
         playSound('ding');
         counter++;
 
-        if (counter >= maxSpins) {
+        if (counter >= 20) {
           clearInterval(interval);
           const winner = presentStudents[Math.floor(Math.random() * presentStudents.length)];
           display.textContent = winner.name;
@@ -1974,40 +1669,24 @@
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let active = false;
-
         particles.forEach(p => {
           if (p.alpha > 0) {
             active = true;
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.3;
-            p.alpha -= 0.02;
-
-            ctx.save();
-            ctx.globalAlpha = Math.max(0, p.alpha);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
-            ctx.restore();
+            p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.alpha -= 0.02;
+            ctx.save(); ctx.globalAlpha = Math.max(0, p.alpha); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.restore();
           }
         });
-
         if (active) requestAnimationFrame(animate);
-        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
       animate();
     }
 
-    /* SETTINGS & BACKUP */
     function openSettingsModal() {
       document.getElementById('googleWebAppUrlInput').value = appData ? appData.googleWebAppUrl || '' : '';
       document.getElementById('autoSyncCheckbox').checked = appData ? appData.autoSync || false : false;
       document.getElementById('settingsModal').classList.remove('hidden');
     }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
+    function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
 
     function exportDataJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
@@ -2026,17 +1705,13 @@
           if (imported && imported.classes) {
             appData = imported;
             validateAndSanitizeState();
-            saveData(true);
+            saveData();
             renderApp();
             closeSettingsModal();
           }
-        } catch (err) {
-          console.error("Error parsing JSON backup.");
-        }
+        } catch (err) { console.error("Error parsing JSON backup."); }
       };
-      if (event.target.files[0]) {
-        fileReader.readAsText(event.target.files[0]);
-      }
+      if (event.target.files[0]) fileReader.readAsText(event.target.files[0]);
     }
 
     function escapeHtml(str) {
@@ -2045,7 +1720,6 @@
       });
     }
 
-    /* INIT */
     window.onload = function() {
       loadAndMigrateData();
       setPointsDateToToday();
