@@ -349,9 +349,9 @@
             <span>Add Table</span>
           </button>
           
-          <button onclick="resetDailyTablePoints()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-            <i class="fa-solid fa-rotate-left text-slate-400"></i>
-            <span>Reset Daily Points</span>
+          <button onclick="resetDailyTablePoints()" class="text-xs bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-left text-rose-400"></i>
+            <span>Reset All Points</span>
           </button>
         </div>
       </div>
@@ -566,7 +566,7 @@
       </div>
       <div class="flex gap-2 pt-2">
         <button id="confirmModalActionBtn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow transition">
-          Delete
+          Reset
         </button>
         <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
           Cancel
@@ -1347,11 +1347,28 @@
       if (awarded) { playSound('fanfare'); saveData(); renderTablesGrid(); }
     }
 
+    /* RESET ALL DAILY POINTS (TABLE + ALL STUDENTS) */
     function resetDailyTablePoints() {
-      openCustomConfirm("Reset Daily Points?", "This will reset table group points to 0 for this class.", () => {
-        const currentClass = getActiveClass();
-        if (currentClass) { currentClass.tables.forEach(t => t.dailyPoints = 0); saveData(); renderTablesGrid(); }
-      });
+      openCustomConfirm(
+        "Reset All Daily Points?", 
+        "This will reset all individual student points AND table group points to 0 for this class.", 
+        () => {
+          const currentClass = getActiveClass();
+          if (currentClass && currentClass.tables) {
+            currentClass.tables.forEach(table => {
+              table.dailyPoints = 0;
+              if (table.students) {
+                table.students.forEach(student => {
+                  student.points = 0;
+                });
+              }
+            });
+            playSound('dong');
+            saveData();
+            renderTablesGrid();
+          }
+        }
+      );
     }
 
     /* CONFIRMATION & MODALS */
